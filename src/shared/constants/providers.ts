@@ -1,4 +1,4 @@
-// Re-export service kinds from leaf module (avoids circular dep with providerSchema)
+﻿// Re-export service kinds from leaf module (avoids circular dep with providerSchema)
 export type { ServiceKind } from "./serviceKinds";
 export type RiskNoticeVariant = "oauth" | "webCookie" | "deprecated" | "embedded-service";
 
@@ -26,7 +26,7 @@ export const FREE_APIKEY_PROVIDER_IDS = new Set([
   "dahl",
   // auggie is a fully local, credential-less CLI passthrough (auth handled by
   // `auggie login` outside OmniRoute). Admitted here purely so POST /api/providers
-  // accepts an optional connection row for display/priority/testStatus tracking —
+  // accepts an optional connection row for display/priority/testStatus tracking â€”
   // no apiKey is ever required or sent upstream.
   "auggie",
   // zcode is a local app-server backend; auth stays in the ZCode profile.
@@ -239,7 +239,7 @@ export function isSelfHostedChatProvider(providerId: unknown): boolean {
 // Providers with heterogeneous/no-key auth that don't fit the NOAUTH_PROVIDERS
 // registry (e.g. free-tier gateways where a key is accepted but not required).
 // Kept as a Set (not an || chain) to keep providerAllowsOptionalApiKey's
-// cyclomatic complexity flat as this list grows — see g4f.space (#6650).
+// cyclomatic complexity flat as this list grows â€” see g4f.space (#6650).
 const EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS = new Set([
   "searxng-search",
   "firecrawl",
@@ -253,7 +253,9 @@ const EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS = new Set([
   "gitlawb",
   "gitlawb-gmi",
   "naga-ac",
-  // UC (uncensored.com) persona: un-metered subscription chat with NO API key —
+  // Factory: registry marks OVHcloud authType optional; keep validation consistent.
+  "ovhcloud",
+  // UC (uncensored.com) persona: un-metered subscription chat with NO API key â€”
   // auth is a durable Clerk credential stored in providerSpecificData, from which
   // the executor mints a short-lived session token per connect.
   "uc",
@@ -261,7 +263,7 @@ const EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS = new Set([
 
 export function providerAllowsOptionalApiKey(providerId: unknown): boolean {
   return (
-    // ponytail: any noAuth provider auto-qualifies — no per-provider maintenance
+    // ponytail: any noAuth provider auto-qualifies â€” no per-provider maintenance
     (typeof providerId === "string" && providerId in NOAUTH_PROVIDERS) ||
     (typeof providerId === "string" && EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS.has(providerId)) ||
     isLocalProvider(providerId) ||
@@ -272,7 +274,7 @@ export function providerAllowsOptionalApiKey(providerId: unknown): boolean {
 }
 
 /**
- * Providers explicitly excluded from bulk API key add — auth is heterogeneous,
+ * Providers explicitly excluded from bulk API key add â€” auth is heterogeneous,
  * OAuth-based, multi-field, or requires manual setup per connection.
  */
 const BULK_API_KEY_EXCLUDED = new Set([
@@ -303,7 +305,7 @@ export function supportsBulkApiKey(providerId: unknown): boolean {
   return true;
 }
 
-// ── System Providers (virtual, not user-connectable) ──────────────────────────
+// â”€â”€ System Providers (virtual, not user-connectable) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const _PROVIDER_SECTIONS = [
   NOAUTH_PROVIDERS,
@@ -491,8 +493,8 @@ export const ID_TO_ALIAS = new Proxy({} as Record<string, string>, {
 
 export { USAGE_SUPPORTED_PROVIDERS } from "@omniroute/open-sse/services/usage/supportedProviders.ts";
 
-// ── Zod validation, lazily on first AI_PROVIDERS access (perf: skips the walk
-// for processes that never touch AI_PROVIDERS, e.g. short-lived CLI commands) ──
+// â”€â”€ Zod validation, lazily on first AI_PROVIDERS access (perf: skips the walk
+// for processes that never touch AI_PROVIDERS, e.g. short-lived CLI commands) â”€â”€
 
 // Re-export the extracted data catalogs so external importers of providers.ts are unchanged.
 export {

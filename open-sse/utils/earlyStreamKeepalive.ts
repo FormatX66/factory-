@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file earlyStreamKeepalive.ts
  * @description Early SSE keepalive wrapper so short idle-read clients stay connected
  * while the handler waits on upstream first-byte (reasoning models, combo failover).
@@ -10,7 +10,7 @@
  * Strict HTTP clients (notably Codex CLI's `reqwest`, which has a ~5s idle-read
  * timeout) drop the connection if no bytes arrive shortly after the request.
  * The proxy holds the streaming response until `ensureStreamReadiness` observes
- * the upstream's first useful byte — which can exceed 5s for reasoning models
+ * the upstream's first useful byte â€” which can exceed 5s for reasoning models
  * that "think" before emitting any token (#2544). `curl` has no such idle
  * timeout, so it was never affected, which is why the bug looked client-specific.
  *
@@ -19,7 +19,7 @@
  * run inside the handler before it resolves):
  *
  *   - Fast path: if the handler resolves within `thresholdMs`, its `Response`
- *     is returned verbatim — identical status, headers, and body. There is zero
+ *     is returned verbatim â€” identical status, headers, and body. There is zero
  *     behavior change for normal latency, so metadata headers and non-200 error
  *     statuses are fully preserved for the common case.
  *
@@ -39,7 +39,7 @@ const KEEPALIVE_FRAME = ENCODER.encode(": keepalive\n\n");
 // OpenAI-compatible keepalive: a syntactically valid empty streaming chunk.
 // Some OpenAI-compatible clients parse every non-empty SSE line as JSON and
 // reject legal SSE comments before their first provider chunk arrives.
-// id/model stay brand-neutral — these frames go to the client, not upstream.
+// id/model stay brand-neutral â€” these frames go to the client, not upstream.
 export const OPENAI_KEEPALIVE_FRAME = ENCODER.encode(
   'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","created":0,"model":"keepalive","choices":[{"index":0,"delta":{},"finish_reason":null}]}\n\n'
 );
@@ -52,10 +52,10 @@ export const OPENAI_STARTUP_FRAME = OPENAI_KEEPALIVE_FRAME;
 // token the comment frame lets the client abort and retry the stream. Anthropic's own
 // API emits `event: ping` for exactly this reason; the /v1/messages route mirrors it.
 export const ANTHROPIC_PING_FRAME = ENCODER.encode('event: ping\ndata: {"type":"ping"}\n\n');
-// Anthropic Messages API default — Anthropic's own spec really does use a named
+// Anthropic Messages API default â€” Anthropic's own spec really does use a named
 // `event: error` SSE frame, so this is correct there. It is WRONG for the OpenAI-
 // format routes below: Chat Completions and Responses streaming never use the SSE
-// `event:` field at all, only bare `data: {...}` lines — a naive line-based parser
+// `event:` field at all, only bare `data: {...}` lines â€” a naive line-based parser
 // (the kind most OpenAI-compatible clients use, not a full EventSource) can silently
 // drop an unrecognized `event:` line and/or desync on the `data:` line that follows,
 // so this error would never surface to the client at all (log ids
@@ -68,7 +68,7 @@ const ERROR_FRAME = ENCODER.encode(
   })}\n\n`
 );
 // Chat Completions convention: a plain `data:` line, no `event:` field. This
-// matches what the openai-node SDK's stream iterator actually checks for — it
+// matches what the openai-node SDK's stream iterator actually checks for â€” it
 // inspects each parsed chunk for a top-level `error` key regardless of any SSE
 // event name (there isn't one to check, since real OpenAI chat completions
 // streams never send `event:` lines).
@@ -79,7 +79,7 @@ export const OPENAI_CHAT_ERROR_FRAME = ENCODER.encode(
 );
 // Responses API convention: also a plain `data:` line, but the discriminator is
 // the `type` field INSIDE the JSON payload (matching every other Responses API
-// event — response.output_text.delta, response.completed, etc.), not an SSE
+// event â€” response.output_text.delta, response.completed, etc.), not an SSE
 // `event:` field.
 export const OPENAI_RESPONSES_ERROR_FRAME = ENCODER.encode(
   `data: ${JSON.stringify({
@@ -88,7 +88,7 @@ export const OPENAI_RESPONSES_ERROR_FRAME = ENCODER.encode(
     message: "Upstream stream failed before completion.",
     param: null,
     // #14330: was hardcoded to 0, colliding with the real per-stream emitter's
-    // first event (also numbered 1 from its own `state.seq` base of 0) — this
+    // first event (also numbered 1 from its own `state.seq` base of 0) â€” this
     // frame is synthesized outside that counter, so it uses the shared seed.
     sequence_number: SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
   })}\n\n`
@@ -122,7 +122,7 @@ function readRetryAfterSeconds(headers: Headers): number | null {
  * convention (`{"type":"error",...}`) for the dynamic real-upstream-body branch
  * of the slow path (#13431). The body reaching here is Chat-Completions-shaped
  * (`{"error":{message,type,code}}`, the combo/handler failure convention) most of
- * the time, but may also be a bare `{message}` or unparseable text — every shape
+ * the time, but may also be a bare `{message}` or unparseable text â€” every shape
  * must still produce a non-empty `message` so the client never sees an opaque
  * frame (never crash the stream on a malformed body).
  */
@@ -169,7 +169,7 @@ function buildResponsesErrorDataLine(
     code,
     message,
     param,
-    // #14330: was hardcoded to 0 — see OPENAI_RESPONSES_ERROR_FRAME above.
+    // #14330: was hardcoded to 0 â€” see OPENAI_RESPONSES_ERROR_FRAME above.
     sequence_number: SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
     ...statusFields,
     ...extras,
@@ -181,7 +181,7 @@ export type EarlyStreamKeepaliveOptions = {
   thresholdMs?: number;
   /** Keepalive cadence once committed (must stay under the client idle timeout). */
   intervalMs?: number;
-  /** Client request signal — propagated so a client disconnect cancels the upstream read. */
+  /** Client request signal â€” propagated so a client disconnect cancels the upstream read. */
   signal?: AbortSignal | null;
   /**
    * Frame emitted on each keepalive tick. Defaults to an SSE comment
@@ -191,7 +191,7 @@ export type EarlyStreamKeepaliveOptions = {
    */
   keepaliveFrame?: Uint8Array;
   /**
-   * Frame emitted ONCE, immediately, as the very first byte of the slow path —
+   * Frame emitted ONCE, immediately, as the very first byte of the slow path â€”
    * before the recurring `keepaliveFrame` ticks start. Defaults to
    * `keepaliveFrame` when omitted (today's behavior, unchanged).
    */
@@ -210,15 +210,15 @@ export type EarlyStreamKeepaliveOptions = {
    * committed to HTTP 200. Defaults to the Anthropic-style `event: error` frame
    * (correct for /v1/messages). OpenAI-format routes (/v1/chat/completions,
    * /v1/responses) MUST pass OPENAI_CHAT_ERROR_FRAME / OPENAI_RESPONSES_ERROR_FRAME
-   * instead — see the doc comment on the default ERROR_FRAME above for why.
+   * instead â€” see the doc comment on the default ERROR_FRAME above for why.
    */
   errorFrame?: Uint8Array;
   /**
    * Request correlation id, threaded from the route's own handleChat(...,
    * correlationId) call. When set, every byte this wrapper writes to the
    * client directly (startup frame, periodic keepalive ticks, and any
-   * in-band error frame) — everything except the verbatim-forwarded real
-   * response body, which the handler's own reqLogger already captures — is
+   * in-band error frame) â€” everything except the verbatim-forwarded real
+   * response body, which the handler's own reqLogger already captures â€” is
    * recorded via earlyKeepaliveByteBuffer and merged into this same
    * request's call-log streamChunks.client by
    * chatCore/attemptLogging.ts, so the persisted artifact reflects what
@@ -228,8 +228,8 @@ export type EarlyStreamKeepaliveOptions = {
   correlationId?: string;
   /**
    * Abort controller owned by the route via `withDeadlineSignal` (see below).
-   * The wrapper aborts it when the slow-path deadline expires, so the handler —
-   * which observes the combined signal through the wrapped request — tears down
+   * The wrapper aborts it when the slow-path deadline expires, so the handler â€”
+   * which observes the combined signal through the wrapped request â€” tears down
    * exactly as on a client disconnect (concurrency slots released). Omit to run
    * without a deadline abort (tests may pass a bare controller; routes always
    * pass the one returned by the helper).
@@ -253,7 +253,7 @@ export type EarlyStreamKeepaliveOptions = {
  * rate-limit queue 300 s + park-and-resume 120 s + cooldown budgets 300 s +
  * first-byte readiness ceiling 600 s = 1 320 s, + 660 s margin (~50%).
  * Anything pending past this point is a stuck handler, not legitimate work.
- * Internal constant, never an exposed setting — routes share this default.
+ * Internal constant, never an exposed setting â€” routes share this default.
  */
 export const SLOW_PATH_DEADLINE_MS = 1_980_000;
 
@@ -268,7 +268,7 @@ const deadlineControllersByToken = new Map<string, WeakRef<AbortController>>();
 const deadlineTokenByController = new WeakMap<AbortController, string>();
 let deadlineTokenSeq = 0;
 // The token map is keyed by strings, so its entries would otherwise outlive the
-// request forever (one per streamed request → unbounded growth). Three layers keep
+// request forever (one per streamed request â†’ unbounded growth). Three layers keep
 // it bounded: an explicit release when the keepalive wrapper finishes (settle,
 // abort, cancel or expiry), a FinalizationRegistry backstop for requests that never
 // reach the wrapper (non-streaming paths), and a hard size cap as a last resort.
@@ -317,8 +317,8 @@ export function __getDeadlineTokenRegistrySizeForTests(): number {
  * body byte-for-byte.
  *
  * Controller recovery downstream (`getDeadlineController`) is two-layered:
- * the combined signal object (fast path — same object when nothing rebuilds),
- * plus an internal header token (rebuild path — `clone()` and admission
+ * the combined signal object (fast path â€” same object when nothing rebuilds),
+ * plus an internal header token (rebuild path â€” `clone()` and admission
  * `rebuildRequest` mint new signal objects but copy headers). The token header
  * is scrubbed from the client-log envelope and executor client headers (same
  * treatment as the existing `x-omniroute-lease-*` control headers), so it never
@@ -333,12 +333,25 @@ export function withDeadlineSignal(request: Request): {
     ? AbortSignal.any([request.signal, deadlineController.signal])
     : deadlineController.signal;
   const headers = new Headers(request.headers);
-  // Internal routing token only (never logged, never forwarded upstream — the
+  // Internal routing token only (never logged, never forwarded upstream â€” the
   // handler builds upstream headers from an allowlist). Survives clone() and
   // admission rebuilds, which both copy headers but mint new signal objects.
   const token = `dl-${Date.now().toString(36)}-${(deadlineTokenSeq += 1)}`;
   headers.set(DEADLINE_TOKEN_HEADER, token);
-  const wrappedReq = new Request(request, { signal: combined, headers });
+  let wrappedReq: Request;
+  try {
+    wrappedReq = new Request(request, { signal: combined, headers });
+  } catch (error) {
+    // Node 24 + Next dev may pass a Request from another undici realm.
+    // Reconstruct from public fields instead of touching that realm's private #state.
+    if (!(error instanceof TypeError) || !String(error.message).includes("private member #state")) throw error;
+    const init: RequestInit & { duplex?: "half" } = { method: request.method, headers, signal: combined };
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      init.body = request.body;
+      init.duplex = "half";
+    }
+    wrappedReq = new Request(request.url, init);
+  }
   deadlineControllers.set(combined, deadlineController);
   deadlineControllersByToken.set(token, new WeakRef(deadlineController));
   deadlineTokenByController.set(deadlineController, token);
@@ -379,7 +392,7 @@ export function getDeadlineController(request: {
 /**
  * Tagged with a string rather than an `ok: true | false` boolean: this workspace compiles
  * with `strictNullChecks: false`, where a boolean-literal discriminant narrows the positive
- * branch but not the negative one — so reading `.error` off the rejected arm did not
+ * branch but not the negative one â€” so reading `.error` off the rejected arm did not
  * type-check. A string discriminant narrows both branches under the same settings.
  */
 type SettledHandler =
@@ -415,7 +428,7 @@ export async function withEarlyStreamKeepalive(
   //   - "responses": plain `data:` line, discriminated by a top-level `type` field
   //     inside the JSON payload (OpenAI Responses API convention).
   //   - "chat": plain `data:` line, discriminated by a top-level `error` key
-  //     (OpenAI Chat Completions convention) — the default/fallback.
+  //     (OpenAI Chat Completions convention) â€” the default/fallback.
   const decodedErrorFrame = new TextDecoder().decode(errorFrame);
   const errorFrameFormat: "anthropic" | "responses" | "chat" = decodedErrorFrame.startsWith(
     "event:"
@@ -441,7 +454,7 @@ export async function withEarlyStreamKeepalive(
   const warn = options.log?.warn ?? null;
   const frameDecoder = correlationId ? new TextDecoder() : null;
   // Records every direct-to-client write EXCEPT the forwarded real response
-  // body — that one is already captured by the handler's own reqLogger, so
+  // body â€” that one is already captured by the handler's own reqLogger, so
   // recording it again here would duplicate it in the persisted artifact.
   const recordClientBytes = (chunk: Uint8Array): void => {
     if (!correlationId || !frameDecoder) return;
@@ -465,7 +478,7 @@ export async function withEarlyStreamKeepalive(
         /* abort must never throw */
       }
     }, slowPathDeadlineMs);
-    // NOTE: no unref on the deadline timer — it is the last-resort guarantee.
+    // NOTE: no unref on the deadline timer â€” it is the last-resort guarantee.
     // An unref'd timer lets a bare-node event loop drain (and a test runner go
     // idle) before firing, which would silently disable the deadline whenever
     // the process has no other pending work. The keepalive interval above stays
@@ -480,7 +493,7 @@ export async function withEarlyStreamKeepalive(
   if (timer) clearTimeout(timer);
 
   if (raced.kind === "settled") {
-    // Fast path — return verbatim, or rethrow so the route's normal error handling runs.
+    // Fast path â€” return verbatim, or rethrow so the route's normal error handling runs.
     if (deadlineTimer) clearTimeout(deadlineTimer);
     releaseDeadlineController(deadlineController);
     const result = raced.result;
@@ -488,7 +501,7 @@ export async function withEarlyStreamKeepalive(
     throw result.error;
   }
 
-  // Slow path — open the SSE stream now and keep it warm until the handler resolves.
+  // Slow path â€” open the SSE stream now and keep it warm until the handler resolves.
   // Cleanup state is hoisted so both start() and cancel() (client disconnect) can stop
   // the keepalive loop and cancel the upstream read.
   let stopKeepalive = () => {};
@@ -559,7 +572,7 @@ export async function withEarlyStreamKeepalive(
         // Abort the route-owned controller (the handler observes it exactly like
         // a client disconnect and releases its concurrency slots), emit the
         // route's error frame in-band, log one correlated line, and close.
-        // Never the raw error — same generic frame as a handler failure.
+        // Never the raw error â€” same generic frame as a handler failure.
         if (aborted) return;
         aborted = true;
         stopDeadline();
@@ -618,7 +631,7 @@ export async function withEarlyStreamKeepalive(
         }
 
         if (result.status === "rejected") {
-          // Handler rejected — emit a generic error frame (never the raw error/stack).
+          // Handler rejected â€” emit a generic error frame (never the raw error/stack).
           controller.enqueue(errorFrame);
           recordClientBytes(errorFrame);
         } else {
@@ -627,7 +640,7 @@ export async function withEarlyStreamKeepalive(
           const isSse = contentType.includes("text/event-stream");
 
           if (response.body && isSse) {
-            // Real SSE stream — forward it verbatim.
+            // Real SSE stream â€” forward it verbatim.
             upstreamReader = response.body.getReader();
             let bytesForwarded = 0;
             try {
@@ -641,7 +654,7 @@ export async function withEarlyStreamKeepalive(
               }
             } catch (readErr) {
               // Upstream stream failed mid-flight. Only emit an error frame if
-              // NO content was forwarded yet — otherwise the client already
+              // NO content was forwarded yet â€” otherwise the client already
               // received partial content and a late error frame would corrupt
               // the SSE stream. Silently close instead; the client will see
               // the stream end naturally.
@@ -698,7 +711,7 @@ export async function withEarlyStreamKeepalive(
       }
     },
     cancel() {
-      // Consumer (Next.js → client) went away — stop keepalives and release the upstream.
+      // Consumer (Next.js â†’ client) went away â€” stop keepalives and release the upstream.
       aborted = true;
       stopDeadline();
       stopKeepalive();
