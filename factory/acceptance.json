@@ -1,6 +1,6 @@
 ﻿{
     "schema":  "factory.acceptance.v1",
-    "checked_at":  "2026-09-28T14:23:48.7475538Z",
+    "checked_at":  "2026-09-28T19:26:25.1996572Z",
     "static_and_local_checks":  {
                                     "gateway_loopback":  true,
                                     "free_route":  true,
