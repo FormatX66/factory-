@@ -1,0 +1,10 @@
+﻿{
+  "schema": "factory.continuous-coding.v1",
+  "gateway": "http://127.0.0.1:20128",
+  "model": "auto/coding:free",
+  "profile": "free",
+  "free_only": true,
+  "allow_full_pool_fallback": false,
+  "compression": {"mode":"rtk","auto_trigger_tokens":20000,"ultra":false},
+  "acceptance": {"min_distinct_providers":2,"require_same_task_continuity":true,"restore_provider_after_test":true}
+}
