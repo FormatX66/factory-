@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference='Stop'
+$ErrorActionPreference='Stop'
 $cfg=Get-Content "$PSScriptRoot\factory.config.json" -Raw | ConvertFrom-Json
 $checks=[ordered]@{}
 $checks.gateway_loopback=$cfg.gateway -eq 'http://127.0.0.1:20128'
@@ -15,7 +15,19 @@ if($checks.profile_exists){
  $checks.permission_default=$s.permissions.defaultMode -eq 'default'
 }
 try{$h=Invoke-RestMethod -Uri 'http://127.0.0.1:20128/api/monitoring/health' -TimeoutSec 5;$checks.gateway_healthy=$h.status -eq 'healthy'}catch{$checks.gateway_healthy=$false}
-$live=[ordered]@{provider_count_verified=0;live_inference_verified=$false;provider_handoff_verified=$false;reason='Requires two authenticated free providers and a synthetic continuity test.'}
+$live=[ordered]@{provider_count_verified=0;live_inference_verified=$false;provider_handoff_verified=$false;reason='No verified cross-worker handoff evidence found.'}
+$root=Split-Path $PSScriptRoot -Parent
+$handoffPath=Join-Path $root '.factory-evidence\handoff-001.json'
+if(Test-Path $handoffPath){
+ $e=Get-Content $handoffPath -Raw | ConvertFrom-Json
+ $distinct=$e.workerA -and $e.workerB -and $e.workerA -ne $e.workerB
+ if($e.passed -and $distinct){
+  $live.provider_count_verified=2
+  $live.live_inference_verified=$true
+  $live.provider_handoff_verified=$true
+  $live.reason="Verified durable handoff: $($e.workerA) -> $($e.workerB), nonce $($e.nonce)."
+ }
+}
 $result=[ordered]@{schema='factory.acceptance.v1';checked_at=(Get-Date).ToUniversalTime().ToString('o');static_and_local_checks=$checks;live_acceptance=$live}
 $result | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 "$PSScriptRoot\acceptance.json"
 $result | ConvertTo-Json -Depth 6

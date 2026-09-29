@@ -1,0 +1,10 @@
+﻿import fs from 'node:fs'; import {createTask} from './agent-core.mjs'; import {observePool,chooseWorker} from './worker-pool.mjs'; import {runCodexTask} from './codex-worker.mjs'; import {runLocalTask} from './local-worker.mjs';
+const brief=fs.readFileSync('factory/SELF-BUILD-TASK.md','utf8');
+const task=createTask({id:'self-build-001',goal:'improve Factory provider bootstrap',requirements:['derive providers from observed capability','preserve LKG','no secrets'],constraints:['design note only in this run','no provider credentials'],repo:'FormatX66/factory-',lkg:'a58000c7685f4091c7a6fd8ddf3ebce7d2ec67c3'});
+const workers=await observePool({cwd:process.cwd()}); const selected=chooseWorker(workers,{reasoning:true,tools:true}); if(!selected) throw new Error('no live tool-capable worker');
+if(selected.id!=='subscription/codex') throw new Error(`unexpected selected worker ${selected.id}`);
+const primary=await runCodexTask(task,{cwd:process.cwd(),prompt:`Analyze this bounded Factory task. Return a concise implementation design note only; do not modify files.\n\n${brief}`});
+const review=await runLocalTask(primary.task,{prompt:`Review this proposed Factory design for violations of LKG, secret handling, stale-provider assumptions, or unsafe autonomy. Return PASS followed by concise reasons if safe, otherwise FAIL and reasons.\n\n${primary.output}`});
+const passed=/^(?:\*\*)?PASS(?:\*\*)?\b/i.test(review.output.trim()); const result=`# Factory Self-Build Result 001\n\n## Primary worker\n${selected.id}\n\n${primary.output}\n\n## Independent local review\n${review.output}\n`;
+fs.writeFileSync('factory/SELF-BUILD-RESULT.md',result,'utf8'); fs.mkdirSync('.factory-evidence',{recursive:true}); fs.writeFileSync('.factory-evidence/self-build-001.json',JSON.stringify({checked_at:new Date().toISOString(),workers,selected:selected.id,reviewPassed:passed},null,2));
+console.log(JSON.stringify({selected:selected.id,reviewPassed:passed,result:'factory/SELF-BUILD-RESULT.md'},null,2)); process.exit(passed?0:1);

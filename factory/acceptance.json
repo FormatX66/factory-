@@ -1,6 +1,6 @@
 ﻿{
     "schema":  "factory.acceptance.v1",
-    "checked_at":  "2026-09-28T19:26:25.1996572Z",
+    "checked_at":  "2026-09-29T12:18:38.1604094Z",
     "static_and_local_checks":  {
                                     "gateway_loopback":  true,
                                     "free_route":  true,
@@ -14,9 +14,9 @@
                                     "gateway_healthy":  true
                                 },
     "live_acceptance":  {
-                            "provider_count_verified":  0,
-                            "live_inference_verified":  false,
-                            "provider_handoff_verified":  false,
-                            "reason":  "Requires two authenticated free providers and a synthetic continuity test."
+                            "provider_count_verified":  2,
+                            "live_inference_verified":  true,
+                            "provider_handoff_verified":  true,
+                            "reason":  "Verified durable handoff: local/qwen2.5-coder:7b -\u003e subscription/codex, nonce FACTORY-HANDOFF-7A31."
                         }
 }
