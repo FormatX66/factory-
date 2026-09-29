@@ -1,0 +1,55 @@
+{
+  "pageInfo": {
+    "title": "Aurum tools",
+    "description": "Local service links. Use the existing monitor for verified job status."
+  },
+  "appConfig": {
+    "theme": "nord",
+    "layout": "auto",
+    "iconSize": "medium",
+    "defaultOpeningMethod": "newtab",
+    "statusCheck": false,
+    "pingCheckEnabled": false,
+    "preventWriteToDisk": true,
+    "preventLocalSave": true,
+    "disableConfiguration": true,
+    "allowConfigEdit": false,
+    "disableUpdateChecks": true,
+    "enableServiceWorker": false,
+    "enableErrorReporting": false,
+    "enableFontAwesome": false,
+    "enableMaterialDesignIcons": false,
+    "faviconApi": "local",
+    "disableSmartSort": true,
+    "webSearch": {
+      "disableWebSearch": true
+    }
+  },
+  "sections": [
+    {
+      "name": "Existing local services",
+      "items": [
+        {
+          "title": "Aurum monitor",
+          "description": "Existing monitor; authoritative job evidence remains there.",
+          "url": "http://127.0.0.1:19467/"
+        },
+        {
+          "title": "Factory source gateway",
+          "description": "Service link only; not a health assertion.",
+          "url": "http://127.0.0.1:20130/"
+        },
+        {
+          "title": "Original OmniRoute gateway",
+          "description": "Existing gateway; left unchanged.",
+          "url": "http://127.0.0.1:20128/"
+        },
+        {
+          "title": "Medic",
+          "description": "Existing Medic service; no replacement deployed.",
+          "url": "http://127.0.0.1:8090/"
+        }
+      ]
+    }
+  ]
+}

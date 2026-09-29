@@ -1,0 +1,49 @@
+{
+  "mode": "reference-only-not-for-blind-import",
+  "source_commit": "e5aecabdc264a9c066d2dd0f7d53900b68968882",
+  "source_file": "templates.json",
+  "source_sha256": "aa6c01d263280252b4ee23d6f2c11a5b885cb4ebbc487bff7719346ed3405b1c",
+  "selection": {
+    "categories": [
+      "Dashboard",
+      "Tools"
+    ],
+    "description": "The ultimate personal dashboard, keep all your self-hosted services and websites organized. Includes live status monitoring, widgets, icons, themes, 30+ languages, instant search, multi-page support, UI editor, authentication and more. GitHub: [lissy93/dashy](https://github.com/lissy93/dashy)",
+    "env": [
+      {
+        "default": "production",
+        "label": "Node environment",
+        "name": "NODE_ENV",
+        "preset": true
+      },
+      {
+        "default": "UTC",
+        "label": "Timezone, e.g. Europe/London (used for logs and time widgets)",
+        "name": "TZ"
+      }
+    ],
+    "image": "lissy93/dashy:latest",
+    "logo": "https://raw.githubusercontent.com/Lissy93/dashy/master/docs/assets/logo.png",
+    "name": "dashy",
+    "note": "Dashy's main config lives in `/app/user-data/conf.yml`. You can put additional configs, styles, icons, CSS, and other resources in this `user-data` directory too. See the docs at https://dashy.to/docs for more info.",
+    "platform": "linux",
+    "ports": [
+      "4000:8080/tcp"
+    ],
+    "restart_policy": "unless-stopped",
+    "title": "Dashy (container)",
+    "type": 1,
+    "volumes": [
+      {
+        "container": "/app/user-data"
+      }
+    ],
+    "id": 125
+  },
+  "deployment_holds": [
+    "Image is a floating latest tag; choose and verify a digest first.",
+    "Original port mapping is not loopback-restricted.",
+    "Docker Linux engine unavailable at intake.",
+    "Existing monitor is retained; this is not an installed second coordinator."
+  ]
+}

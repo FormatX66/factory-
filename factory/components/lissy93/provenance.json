@@ -1,0 +1,116 @@
+{
+  "schema": "factory.component-intake.v1",
+  "operation_id": "lissy93-component-adoption",
+  "base_commit": "514f5f4acf2a61c1ff3a5054a2741281a4225f1b",
+  "components": [
+    {
+      "repository": "https://github.com/Lissy93/networking-toolbox",
+      "commit": "776805f692c20e59fe5de1942e999ccf91944f54",
+      "license": "MIT",
+      "state": "source-reused",
+      "files": [
+        {
+          "upstream_path": "LICENSE",
+          "local_path": "factory/components/lissy93/vendor/networking-toolbox/LICENSE",
+          "sha256": "c747801bdd6f5536fa7c347b0e8d64235705391100459f88f6b34cc1d17784bd",
+          "git_blob": "96abb80c34485394d101a24c6da36498f528c927",
+          "modified": false
+        },
+        {
+          "upstream_path": "src/lib/types/ip.ts",
+          "local_path": "factory/components/lissy93/vendor/networking-toolbox/src/lib/types/ip.ts",
+          "sha256": "11ebc172669f5f0aa5d1dcc73b5aaaa9050e2e07a19af633071bedb7a9a94146",
+          "git_blob": "4cf73a788aed8c29cbde318e7781a2d9bf166e91",
+          "modified": false
+        },
+        {
+          "upstream_path": "src/lib/utils/ip-calculations.ts",
+          "local_path": "factory/components/lissy93/vendor/networking-toolbox/src/lib/utils/ip-calculations.ts",
+          "sha256": "dedd3a3ebbfba8652b2f30d7a51f8b909965ac323fc1d31803315cca6fc44add",
+          "git_blob": "80cc6d5bbed5e5941108babcf029928b265bf738",
+          "modified": false
+        },
+        {
+          "upstream_path": "src/lib/utils/ip-conversions.ts",
+          "local_path": "factory/components/lissy93/vendor/networking-toolbox/src/lib/utils/ip-conversions.ts",
+          "sha256": "5b31ab656e642d867969052dddd47c2bdce4846b8f660c0c9be8871e54ab58d0",
+          "git_blob": "2c9a511fafd53de79dd987aec6be714ca00aed59",
+          "modified": false
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/Lissy93/dashy",
+      "commit": "6d7a394da71d083e719e32f3e365fa99fec320c2",
+      "license": "MIT",
+      "state": "configuration-staged",
+      "files": [
+        {
+          "upstream_path": "LICENSE",
+          "local_path": "factory/components/lissy93/vendor/dashy/LICENSE",
+          "sha256": "78f1376d78c6b01c82cb4cb57b5a15155c229093f0343e1f2f8052360b880bd7",
+          "git_blob": "32df62639833ae831903e6c728cb09ee309b55c5",
+          "modified": false
+        },
+        {
+          "upstream_path": "src/utils/config/ConfigSchema.json",
+          "local_path": "factory/components/lissy93/vendor/dashy/src/utils/config/ConfigSchema.json",
+          "sha256": "d25afd2407c7272afe40a18bc89f6387cfa6153153ffda306becc8834e32fe42",
+          "git_blob": "f22857369a6c5baa9451e3c3ba36af7422d7fbb3",
+          "modified": false
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/Lissy93/web-check",
+      "commit": "ef45e84ca2cb1790c38d98e5993e418b4134b6d8",
+      "license": "MIT",
+      "state": "reference-only",
+      "files": [
+        {
+          "upstream_path": "LICENSE",
+          "local_path": "factory/components/lissy93/vendor/web-check/LICENSE",
+          "sha256": "72237fbc4660671305c0a7e05686e53f33d8474f793c1defc84157e0262a1a09",
+          "git_blob": "bee7ddc03c90cc69d10685c0b361facccac675bf",
+          "modified": false
+        },
+        {
+          "upstream_path": "api/headers.js",
+          "local_path": "factory/components/lissy93/vendor/web-check/api/headers.js.txt",
+          "sha256": "93445e0f842ae322ffea99e38776dd9ed5efd315210bf9840ad44a6bf68190d3",
+          "git_blob": "c84be1970dd79e3bbd7bb428fa5fb63599cc908d",
+          "modified": false
+        },
+        {
+          "upstream_path": "api/dns.js",
+          "local_path": "factory/components/lissy93/vendor/web-check/api/dns.js.txt",
+          "sha256": "07b630f8914a53b82969344416787ee4fa905094365e6fd572b68eb3a3f983d0",
+          "git_blob": "307853eea7393601307c16b564d710b42ca8c6f8",
+          "modified": false
+        },
+        {
+          "upstream_path": "api/ssl.js",
+          "local_path": "factory/components/lissy93/vendor/web-check/api/ssl.js.txt",
+          "sha256": "a955bae14877864e3a96a6ba0d52504ede47a7862420f2155c2d63b6fdb9ba4f",
+          "git_blob": "fe166d5c15aa4d9d26fd062f7ddf8d1d562a2899",
+          "modified": false
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/Lissy93/portainer-templates",
+      "commit": "e5aecabdc264a9c066d2dd0f7d53900b68968882",
+      "license": "MIT",
+      "state": "reference-only",
+      "files": [
+        {
+          "upstream_path": "LICENSE",
+          "local_path": "factory/components/lissy93/vendor/portainer-templates/LICENSE",
+          "sha256": "dda092f716cffa2ca706dac7f9f8f01673f8da8098f97b0a4d053e2d6774737f",
+          "git_blob": "ca2863b6b71ee55d5874c5ecddc43a5700658a1c",
+          "modified": false
+        }
+      ]
+    }
+  ]
+}
