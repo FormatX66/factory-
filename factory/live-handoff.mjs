@@ -1,0 +1,12 @@
+import fs from 'node:fs'; import path from 'node:path';
+import {createTask,saveTask} from './agent-core.mjs'; import {runLocalTask} from './local-worker.mjs'; import {runCodexTask} from './codex-worker.mjs';
+const nonce='FACTORY-HANDOFF-7A31';
+let task=createTask({id:'handoff-001',goal:'prove provider-independent task continuity',requirements:[`preserve nonce ${nonce}`,'preserve requirement ALPHA','preserve requirement BETA'],constraints:['analysis only','no file edits'],repo:'FormatX66/factory-',lkg:'a58000c7685f4091c7a6fd8ddf3ebce7d2ec67c3'});
+const localPrompt=`Summarize this task for another worker. Include the nonce and both requirements exactly. Nonce: ${nonce}. Requirements: ALPHA and BETA. Do not modify files.`;
+const local=await runLocalTask(task,{prompt:localPrompt}); task=local.task;
+const handoffPrompt=`You are worker B receiving a durable Factory checkpoint, not prior hidden context. Verify continuity from this data. Reply exactly HANDOFF_OK ${nonce} if and only if the checkpoint/output contains nonce ${nonce} and requirements ALPHA and BETA. Otherwise reply HANDOFF_FAIL.\nTASK=${JSON.stringify(task)}\nWORKER_A_OUTPUT=${local.output}`;
+const codex=await runCodexTask(task,{prompt:handoffPrompt,cwd:process.cwd()}); task=codex.task;
+const ok=codex.output.trim().endsWith(`HANDOFF_OK ${nonce}`);
+const receipt={schema:'factory.handoff.v1',checked_at:new Date().toISOString(),workerA:'local/qwen2.5-coder:7b',workerB:'subscription/codex',nonce,localOutput:local.output,codexOutput:codex.output,requirements:task.requirements,passed:ok};
+fs.mkdirSync('.factory-evidence',{recursive:true}); fs.writeFileSync('.factory-evidence/handoff-001.json',JSON.stringify(receipt,null,2)+'\n'); saveTask('.factory-evidence/handoff-001-task.json',task);
+console.log(JSON.stringify(receipt,null,2)); process.exit(ok?0:1);
