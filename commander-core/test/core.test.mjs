@@ -82,3 +82,13 @@ test("symlink escape is rejected when platform permits symlink creation", () => 
   }
   assert.throws(() => f.core.readFile("symlink", "link.txt"), /regular-file/);
 });
+test("timeout kills descendant process tree on Windows", { skip: process.platform !== "win32" }, async () => {
+  const f = fixture();
+  const marker = path.join(f.workspace, "descendant-survived.txt");
+  const childCode = `setTimeout(()=>require('fs').writeFileSync(${JSON.stringify(marker)},'bad'),1200)`;
+  const parentCode = `require('child_process').spawn(process.execPath,['-e',${JSON.stringify(childCode)}],{detached:false});setTimeout(()=>{},5000)`;
+  const result = await f.core.run("tree-timeout", "node", ["-e", parentCode], { timeoutMs: 100 });
+  assert.equal(result.timedOut, true);
+  await new Promise(r => setTimeout(r, 1500));
+  assert.equal(fs.existsSync(marker), false);
+});

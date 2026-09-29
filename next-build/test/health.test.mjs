@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { summarizeEvidence } from "../src/health.mjs";
+const tmp=()=>fs.mkdtempSync(path.join(os.tmpdir(),"factory-health-"));
+test("counts healthy held failed and latest timestamp",()=>{const d=tmp(),p=path.join(d,"x.json");fs.writeFileSync(p,JSON.stringify([{status:"healthy",observed_at:"2026-01-01T00:00:00Z"},{status:"held",observed_at:"2026-01-02T00:00:00Z"},{status:"failed",observed_at:"2026-01-03T00:00:00Z"}]));const r=summarizeEvidence([p]);assert.deepEqual(r.totals,{healthy:1,held:1,failed:1});assert.equal(r.last_verified_at,"2026-01-03T00:00:00Z");});
+test("missing input becomes error not crash",()=>{const r=summarizeEvidence(["Z:/does-not-exist.json"]);assert.equal(r.errors[0].error,"missing");});
+test("malformed JSON becomes error not count",()=>{const d=tmp(),p=path.join(d,"bad.json");fs.writeFileSync(p,"{");const r=summarizeEvidence([p]);assert.equal(r.errors[0].error,"malformed-json");assert.deepEqual(r.totals,{healthy:0,held:0,failed:0});});
+test("JSONL receipts are summarized",()=>{const d=tmp(),p=path.join(d,"r.jsonl");fs.writeFileSync(p,JSON.stringify({ok:true,at:"2026-01-04T00:00:00Z"})+"\n"+JSON.stringify({ok:false,at:"2026-01-05T00:00:00Z"})+"\n");const r=summarizeEvidence([p]);assert.deepEqual(r.totals,{healthy:1,held:0,failed:1});assert.equal(r.last_verified_at,"2026-01-05T00:00:00Z");});
