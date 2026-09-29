@@ -15,7 +15,7 @@ test("non-tool Codex failure falls back local",async()=>{
  const r=await dispatchMedicJob({id:"f",goal:"fallback"},{codex:async()=>{throw new Error("down")},local:fake("local")});
  assert.equal(r.route,"local/qwen2.5-coder:7b");
 });
-test("tool-required work holds instead of degrading to tool-less local",async()=>{
- await assert.rejects(()=>dispatchMedicJob({id:"t",goal:"edit",needsTools:true},{codex:async()=>{throw new Error("down")},local:fake("local")}),/down/);
+test("read-only inspection holds instead of degrading to tool-less local",async()=>{
+ await assert.rejects(()=>dispatchMedicJob({id:"t",goal:"inspect",mode:"inspect",needsTools:true},{codex:async()=>{throw new Error("down")},local:fake("local")}),/down/);
 });
 test("unknown classification fails closed",()=>assert.throws(()=>normalizeMedicJob({goal:"x",classification:"unknown"}),/classification/));
