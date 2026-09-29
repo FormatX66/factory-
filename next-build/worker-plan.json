@@ -1,0 +1,32 @@
+{
+  "output": "```json\n{\n  \"generated_at\": \"2026-09-29T12:00:00Z\",\n  \"totals\": { \"healthy\": 0, \"held\": 0, \"failed\": 0 },\n  \"records\": [{\n    \"evidence_id\": \"ev-001\",\n    \"status\": \"healthy\",\n    \"source\": \"collector-a\",\n    \"observed_at\": \"2026-09-29T11:59:00Z\",\n    \"reason\": null,\n    \"checksum\": \"sha256:abc123\"\n  }],\n  \"errors\": []\n}\n```\n\n**Fields:** `generated_at` (ISO-8601), `totals` (counts for all three statuses), `records` (evidence entries), and `errors` (validation failures). Each record requires `evidence_id`, `status` (`healthy|held|failed`), `source`, and `observed_at`; `reason` is nullable but recommended for held/failed records; `checksum` is optional.\n\n**Edge cases:**\n1. Missing `evidence_id`.\n2. Unknown `status`, such as `\"warning\"`.\n3. Invalid or missing `observed_at` timestamp.\n\n**Tests:**\n1. A valid healthy record increments `totals.healthy` and serializes correctly.\n2. Held and failed records retain their reasons and increment the correct totals.\n3. Each malformed input is rejected, appended to `errors`, and excluded from totals.",
+  "task": {
+    "id": "factory-health-dashboard-v01",
+    "title": "Factory Health Dashboard v0.1",
+    "history": [
+      {
+        "at": "2026-09-29T22:40:53.720Z",
+        "worker": "free/opencode/space-bunny-free",
+        "evidence": {
+          "event": "opencode-worker-proposal",
+          "model": "opencode/space-bunny-free",
+          "reportedCost": 0,
+          "output": "```json\n{\n  \"generated_at\": \"2026-09-29T12:00:00Z\",\n  \"totals\": { \"healthy\": 0, \"held\": 0, \"failed\": 0 },\n  \"records\": [{\n    \"evidence_id\": \"ev-001\",\n    \"status\": \"healthy\",\n    \"source\": \"collector-a\",\n    \"observed_at\": \"2026-09-29T11:59:00Z\",\n    \"reason\": null,\n    \"checksum\": \"sha256:abc123\"\n  }],\n  \"errors\": []\n}\n```\n\n**Fields:** `generated_at` (ISO-8601), `totals` (counts for all three statuses), `records` (evidence entries), and `errors` (validation failures). Each record requires `evidence_id`, `status` (`healthy|held|failed`), `source`, and `observed_at`; `reason` is nullable but recommended for held/failed records; `checksum` is optional.\n\n**Edge cases:**\n1. Missing `evidence_id`.\n2. Unknown `status`, such as `\"warning\"`.\n3. Invalid or missing `observed_at` timestamp.\n\n**Tests:**\n1. A valid healthy record increments `totals.healthy` and serializes correctly.\n2. Held and failed records retain their reasons and increment the correct totals.\n3. Each malformed input is rejected, appended to `errors`, and excluded from totals."
+        }
+      }
+    ],
+    "worker": "free/opencode/space-bunny-free",
+    "status": "review",
+    "checkpoint": {
+      "at": "2026-09-29T22:40:53.720Z",
+      "worker": "free/opencode/space-bunny-free",
+      "evidence": {
+        "event": "opencode-worker-proposal",
+        "model": "opencode/space-bunny-free",
+        "reportedCost": 0,
+        "output": "```json\n{\n  \"generated_at\": \"2026-09-29T12:00:00Z\",\n  \"totals\": { \"healthy\": 0, \"held\": 0, \"failed\": 0 },\n  \"records\": [{\n    \"evidence_id\": \"ev-001\",\n    \"status\": \"healthy\",\n    \"source\": \"collector-a\",\n    \"observed_at\": \"2026-09-29T11:59:00Z\",\n    \"reason\": null,\n    \"checksum\": \"sha256:abc123\"\n  }],\n  \"errors\": []\n}\n```\n\n**Fields:** `generated_at` (ISO-8601), `totals` (counts for all three statuses), `records` (evidence entries), and `errors` (validation failures). Each record requires `evidence_id`, `status` (`healthy|held|failed`), `source`, and `observed_at`; `reason` is nullable but recommended for held/failed records; `checksum` is optional.\n\n**Edge cases:**\n1. Missing `evidence_id`.\n2. Unknown `status`, such as `\"warning\"`.\n3. Invalid or missing `observed_at` timestamp.\n\n**Tests:**\n1. A valid healthy record increments `totals.healthy` and serializes correctly.\n2. Held and failed records retain their reasons and increment the correct totals.\n3. Each malformed input is rejected, appended to `errors`, and excluded from totals."
+      }
+    },
+    "fingerprint": "a29375ce57bfa2c114c4ac2b297adacc63ae816d95900607ddc083d7fc9657a1"
+  }
+}

@@ -25,12 +25,13 @@ export class CommanderCore {
   receipt(operationId, action, fields) {
     const record = {
       schema: "aurum.commander.receipt.v1",
-      operationId,
-      action,
-      at: new Date().toISOString(),
-      ...fields,
+      operationId, action, at: new Date().toISOString(), ...fields,
     };
-    fs.appendFileSync(this.evidenceFile, JSON.stringify(record) + "\n", { encoding: "utf8" });
+    const fd = fs.openSync(this.evidenceFile, "a");
+    try {
+      fs.writeSync(fd, JSON.stringify(record) + "\n", null, "utf8");
+      fs.fsyncSync(fd);
+    } finally { fs.closeSync(fd); }
     return record;
   }
 
@@ -55,7 +56,8 @@ export class CommanderCore {
     const env = Object.fromEntries(SAFE_ENV.flatMap((k) => process.env[k] ? [[k, process.env[k]]] : []));
     const startedAt = new Date().toISOString();
     const child = spawn(spec.executable, [...(spec.fixedArgs ?? []), ...args], {
-      cwd: this.workspace, env, shell: false, windowsHide: true, stdio: ["ignore", "pipe", "pipe"]
+      cwd: this.workspace, env, shell: false, windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
+      detached: process.platform !== "win32",
     });
     let stdout = "", stderr = "", bytes = 0, timedOut = false, truncated = false;
     const capture = (kind, chunk) => {
@@ -70,7 +72,13 @@ export class CommanderCore {
     child.stderr.on("data", (c) => capture("stderr", c));
     const timer = setTimeout(() => {
       timedOut = true;
-      child.kill();
+      if (process.platform === "win32") {
+        spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
+          windowsHide: true, shell: false, stdio: "ignore",
+        });
+      } else {
+        try { process.kill(-child.pid, "SIGKILL"); } catch {}
+      }
     }, timeoutMs);
     const exitCode = await new Promise((resolve, reject) => {
       child.once("error", reject);
@@ -84,7 +92,5 @@ export class CommanderCore {
     return { ok, exitCode, timedOut, truncated, stdout, stderr, receipt };
   }
 
-  static operationId() {
-    return crypto.randomUUID();
-  }
+  static operationId() { return crypto.randomUUID(); }
 }
