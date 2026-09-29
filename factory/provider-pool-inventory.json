@@ -1,0 +1,312 @@
+{
+  "schema": "factory.provider-pool-inventory.v1",
+  "source": "FormatX66/factory- release/v3.8.51 open-sse/config/freeModelCatalog.data.ts",
+  "observedAt": "2026-09-29",
+  "recurringPools": 41,
+  "note": "Inventory is discovery evidence, not proof that this account is authenticated or that each provider is currently healthy. ToS verdicts are advisory. hardStopCatalog reflects the shipped catalog flag, not independent inference.",
+  "pools": [
+    {
+      "pool": "api-airforce",
+      "providers": [
+        "api-airforce"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "arcee-free",
+      "providers": [
+        "arcee-ai"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "baidu",
+      "providers": [
+        "baidu"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "bazaarlink",
+      "providers": [
+        "bazaarlink"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "bluesminds",
+      "providers": [
+        "bluesminds"
+      ],
+      "tos": "ambiguous",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "bytez",
+      "providers": [
+        "bytez"
+      ],
+      "tos": "ambiguous",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "cloudflare-ai",
+      "providers": [
+        "cloudflare-ai"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "cohere",
+      "providers": [
+        "cohere"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "gemini-free",
+      "providers": [
+        "gemini"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "zhipu-flash-free",
+      "providers": [
+        "glm-cn",
+        "glm"
+      ],
+      "tos": "ok",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "groq",
+      "providers": [
+        "groq"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": true
+    },
+    {
+      "pool": "huggingchat",
+      "providers": [
+        "huggingchat"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "huggingface",
+      "providers": [
+        "huggingface"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "inference-net",
+      "providers": [
+        "inference-net"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "kilo-gateway-free",
+      "providers": [
+        "kilo-gateway"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "llm7-free",
+      "providers": [
+        "llm7"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "mistral",
+      "providers": [
+        "mistral"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "modelscope-free",
+      "providers": [
+        "modelscope"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "morph",
+      "providers": [
+        "morph"
+      ],
+      "tos": "ok",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "nous-research",
+      "providers": [
+        "nous-research"
+      ],
+      "tos": "ambiguous",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "ollama-cloud",
+      "providers": [
+        "ollama-cloud"
+      ],
+      "tos": "ambiguous",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "opencode-zen-free",
+      "providers": [
+        "opencode-zen"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "openrouter-free",
+      "providers": [
+        "openrouter"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "reka",
+      "providers": [
+        "reka"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "sambanova",
+      "providers": [
+        "sambanova"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "siliconflow",
+      "providers": [
+        "siliconflow"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "tencent",
+      "providers": [
+        "tencent"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "requesty-free",
+      "providers": [
+        "requesty"
+      ],
+      "tos": "ok",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "agnes-free",
+      "providers": [
+        "agnes"
+      ],
+      "tos": "ok",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "agnes-cn-free",
+      "providers": [
+        "agnes-cn"
+      ],
+      "tos": "ok",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "navy-free",
+      "providers": [
+        "navy"
+      ],
+      "tos": "ok",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "ainative-free",
+      "providers": [
+        "ainative"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "aion-free",
+      "providers": [
+        "aion"
+      ],
+      "tos": "ok",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "sealion-free",
+      "providers": [
+        "sealion"
+      ],
+      "tos": "ok",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "routeway-free",
+      "providers": [
+        "routeway"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "nara-free",
+      "providers": [
+        "nara"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": false
+    },
+    {
+      "pool": "xkiro-free",
+      "providers": [
+        "xkiro"
+      ],
+      "tos": "caution",
+      "hardStopCatalog": true
+    }
+  ],
+  "excludedAvoidPools": [
+    "kiro and other shipped entries with tos=avoid are not candidates for unattended Factory routing without explicit review"
+  ],
+  "retired": [
+    "github-models"
+  ]
+}
