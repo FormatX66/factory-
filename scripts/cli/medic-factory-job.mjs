@@ -1,14 +1,21 @@
 #!/usr/bin/env node
-import fs from "node:fs";
 import path from "node:path";
-import { dispatchMedicJob, persistMedicResult } from "../../factory/medic-bridge.mjs";
-let raw=""; for await (const chunk of process.stdin) raw+=chunk;
+import { runMedicJob, FactoryAdmissionError } from "../../factory/medic-bridge.mjs";
 try {
-  const job=JSON.parse(raw); const result=await dispatchMedicJob(job);
-  const root=process.env.FACTORY_MEDIC_EVIDENCE || path.join(process.cwd(),".factory-evidence","medic");
-  persistMedicResult(root,result);
-  process.stdout.write(JSON.stringify({ok:true,id:result.id,route:result.route,status:result.status,output:result.output})+"\n");
-} catch(error) {
-  process.stdout.write(JSON.stringify({ok:false,error:error?.message||"factory job failed"})+"\n");
-  process.exitCode=1;
+  const chunks = []; let bytes = 0;
+  for await (const chunk of process.stdin) {
+    bytes += Buffer.byteLength(chunk);
+    if (bytes > 65536) throw new FactoryAdmissionError("job_too_large");
+    chunks.push(chunk);
+  }
+  const job = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  const root = process.env.FACTORY_MEDIC_EVIDENCE || path.join(process.cwd(), ".factory-evidence", "medic");
+  const result = await runMedicJob(job, { root });
+  const { task, ...response } = result;
+  process.stdout.write(JSON.stringify(response) + "\n");
+  process.exitCode = result.ok ? 0 : 1;
+} catch (error) {
+  const code = error instanceof FactoryAdmissionError ? error.code : "invalid_job_or_evidence_unavailable";
+  process.stdout.write(JSON.stringify({ ok: false, status: "held", error: code, executionVerified: false }) + "\n");
+  process.exitCode = 1;
 }
