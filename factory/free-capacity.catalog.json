@@ -1,0 +1,36 @@
+{
+  "schema": "factory.free-capacity.catalog.v1",
+  "updated": "2026-09-29",
+  "policy": {
+    "max_usd_per_request": 0,
+    "paid_fallback": false,
+    "auto_topup": false,
+    "require_live_canary": true,
+    "default_enabled": false
+  },
+  "providers": [
+    {"id":"opencode-free","kind":"inference","recurring_free":true,"auth":"official-client","card":"no","data":["public","synthetic"],"enabled":false},
+    {"id":"groq","kind":"inference","recurring_free":true,"auth":"api_key","card":"unknown","data":["public","synthetic"],"enabled":false},
+    {"id":"google-gemini","kind":"inference","recurring_free":true,"auth":"api_key","card":"no-for-ai-studio","data":["public","synthetic"],"enabled":false},
+    {"id":"zai","kind":"inference","recurring_free":true,"auth":"api_key","card":"unknown","data":["public","synthetic"],"enabled":false},
+    {"id":"cloudflare-workers-ai","kind":"inference","recurring_free":true,"auth":"api_token","card":"unknown","data":["public","synthetic"],"enabled":false},
+    {"id":"ollama-cloud","kind":"inference","recurring_free":true,"auth":"account","card":"unknown","data":["public","synthetic"],"enabled":false},
+    {"id":"openrouter-free","kind":"inference","recurring_free":true,"auth":"api_key","card":"unknown","data":["public","synthetic"],"enabled":false},
+    {"id":"aion","kind":"inference","recurring_free":true,"auth":"api_key","card":"no","data":["public","synthetic"],"enabled":false},
+    {"id":"nous-portal","kind":"inference","recurring_free":true,"auth":"account","card":"unknown","data":["public","synthetic"],"enabled":false},
+    {"id":"morph","kind":"inference","recurring_free":true,"auth":"api_key","card":"unknown","data":["public","synthetic"],"enabled":false},
+    {"id":"llm7","kind":"inference","recurring_free":true,"auth":"api_key","card":"unknown","data":["public","synthetic"],"enabled":false},
+    {"id":"github-codespaces","kind":"compute","recurring_free":true,"auth":"github","card":"not-required-for-included-quota","data":["private","public","synthetic"],"enabled":false},
+    {"id":"circleci","kind":"compute","recurring_free":true,"auth":"account","card":"unknown","data":["private","public","synthetic"],"enabled":false},
+    {"id":"github-actions","kind":"compute","recurring_free":true,"auth":"github","card":"not-required-for-included-quota","data":["private","public","synthetic"],"enabled":false},
+    {"id":"lightning-ai","kind":"compute","recurring_free":true,"auth":"account","card":"unknown","data":["private","public","synthetic"],"enabled":false},
+    {"id":"kaggle","kind":"compute","recurring_free":true,"auth":"account","card":"unknown","data":["public","synthetic"],"enabled":false},
+    {"id":"oracle-always-free","kind":"compute","recurring_free":true,"auth":"account","card":"yes-verification","data":["private","public","synthetic"],"enabled":false}
+  ],
+  "excluded": [
+    {"id":"cerebras","reason":"trial-only"},
+    {"id":"github-models","reason":"retired"},
+    {"id":"qwen-code-oauth-free","reason":"ended-2026-04-15"},
+    {"id":"huggingface-compute-spaces","reason":"paid-plan-required"}
+  ]
+}
