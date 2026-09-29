@@ -1,0 +1,107 @@
+{
+  "schema": "factory.provider-pool-plan.v2",
+  "researchedAt": "2026-09-29",
+  "routing": {
+    "primary": "auto/coding:free",
+    "principle": "Let OmniRoute select among connected free providers; Factory selects transport/capability, not individual API keys.",
+    "noSilentDowngrade": true
+  },
+  "providers": [
+    {
+      "id": "opencode-free",
+      "state": "verified-worker",
+      "auth": "official-client",
+      "role": "public-synthetic-coding",
+      "notes": "Already implemented on factory/continuous-coding; shared quota group."
+    },
+    {
+      "id": "mistral",
+      "state": "connect-when-authenticated",
+      "auth": "api-key",
+      "role": "large-recurring-pool",
+      "quota": "OmniRoute catalog currently records a shared 1B/month organization pool; recheck account console before promotion."
+    },
+    {
+      "id": "groq",
+      "state": "connect-when-authenticated",
+      "auth": "api-key",
+      "role": "fast-background",
+      "quota": "OmniRoute catalog re-audit records five per-model 200K TPD caps; keep per-model buckets distinct."
+    },
+    {
+      "id": "cloudflare-ai",
+      "state": "connect-when-authenticated",
+      "auth": "account-token",
+      "role": "daily-fallback",
+      "quota": "Official docs: 10,000 neurons/day, reset 00:00 UTC.",
+      "hardStop": true
+    },
+    {
+      "id": "openrouter",
+      "state": "connect-when-authenticated",
+      "auth": "api-key",
+      "role": "free-model-aggregator",
+      "quota": "Official pricing: 25+ free models, free plan 50 requests/day. Use :free/zero-price models only.",
+      "hardStop": true
+    },
+    {
+      "id": "gemini",
+      "state": "connect-when-authenticated",
+      "auth": "api-key",
+      "role": "long-context-free",
+      "quota": "Limits vary by project/model and are per project, not per key; read live AI Studio limits."
+    },
+    {
+      "id": "glm-cn",
+      "state": "connect-when-authenticated",
+      "auth": "api-key",
+      "role": "recurring-uncapped",
+      "quota": "OmniRoute catalog classifies GLM Flash family as recurring free with no published token cap."
+    },
+    {
+      "id": "kilo-gateway",
+      "state": "connect-when-authenticated",
+      "auth": "api-key",
+      "role": "rotating-free-coding",
+      "quota": "OmniRoute catalog classifies Kilo Auto Free as recurring-uncapped; treat models as one provider/quota identity."
+    },
+    {
+      "id": "nvidia",
+      "state": "evaluation-only",
+      "auth": "api-key",
+      "role": "prototype-fallback",
+      "quota": "No defensible recurring token total in current OmniRoute catalog; free access is evaluation/prototyping oriented."
+    },
+    {
+      "id": "cerebras",
+      "state": "do-not-count-as-recurring-free",
+      "auth": "api-key",
+      "role": "optional-credit",
+      "quota": "OmniRoute corrected it on 2026-09-03 to one-time signup credit requiring payment method; do not count as steady free capacity."
+    },
+    {
+      "id": "github-models",
+      "state": "retired",
+      "auth": "none",
+      "role": "none",
+      "quota": "Retired 2026-07-30; never schedule."
+    },
+    {
+      "id": "sambanova",
+      "state": "do-not-count-as-recurring-free",
+      "auth": "api-key",
+      "role": "optional-credit",
+      "quota": "Current OmniRoute provider reference describes signup credit, not a permanent free pool."
+    }
+  ],
+  "adoption": [
+    "Prefer existing OmniRoute provider registry/free catalog over adding duplicate provider integrations.",
+    "Use capability filters before quota/latency scoring.",
+    "Track quota identity separately from model identity so aliases/models do not multiply one shared allowance.",
+    "Distinguish daily exhaustion, temporary capacity, auth failure, model failure and provider outage.",
+    "Cooldown only the narrowest failed scope; preserve healthy sibling models/accounts.",
+    "Never rotate keys/projects to circumvent provider limits.",
+    "Require fresh canary evidence before Factory marks a provider healthy.",
+    "Never send private data to public/free workers unless that worker's data policy explicitly permits it."
+  ]
+}
