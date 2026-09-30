@@ -1,0 +1,14 @@
+{
+  "id": "aurum-ecosystem-synthetic-acceptance",
+  "goal": "Check the Aurum ecosystem integration contract using a synthetic proposal only.",
+  "classification": "synthetic",
+  "requirements": [
+    "Keep results in review; verify delivery separately."
+  ],
+  "constraints": [
+    "No live model, credentials, commands, service changes or paid usage."
+  ],
+  "needsTools": false,
+  "repo": "FormatX66/factory-",
+  "lkg": "eb144c7b9145f7b6e883c796ebec9272711461de"
+}

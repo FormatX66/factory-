@@ -1,0 +1,32 @@
+{
+  "schema": "aurum.ecosystem.release-candidate.v1",
+  "operation_id": "aurum-ecosystem-unification",
+  "base": "eb144c7b9145f7b6e883c796ebec9272711461de",
+  "tests": {
+    "count": 28,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "python": "3.12.10",
+    "node": "24.21.0"
+  },
+  "independent_readback_checks": 38,
+  "verified_scope": [
+    "actual pinned Future Branch plus actual Factory bridge with synthetic worker injection",
+    "retained fixture receipt and no-duplicate replay",
+    "read-only status of four live component endpoints",
+    "unchanged canonical Factory source and original listener PIDs"
+  ],
+  "live_dispatch": false,
+  "deployed": false,
+  "remote_cutover_resumed": false,
+  "resident_explorer_stopped": false,
+  "known_limits": [
+    "Authenticated Medic job dispatch rejected by platform safety review",
+    "Medic main endpoint did not respond",
+    "No production execution, provider failover, physical reboot or unattended operation acceptance",
+    "Latest bus post-check report rejected; reporting visibility gap",
+    "Current ChatGPT thread ID unavailable"
+  ],
+  "rollback": "Stop using candidate; live installation is unchanged."
+}
