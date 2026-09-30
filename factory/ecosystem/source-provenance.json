@@ -1,0 +1,16 @@
+[
+  {
+    "file": "vendor/aurum_farmer/decision_engine.py",
+    "repository": "FormatX66/BoxBrain",
+    "commit": "2dda696542864bea159045bb3dfabfb5443cbc94",
+    "path": "Projects/AurumFarmer/aurum_farmer/decision_engine.py",
+    "sha256": "13f04a145e499fbc07e7191b6d40e621446a66024f6d1483d304a789ca65cd09"
+  },
+  {
+    "file": "vendor/aurum_farmer/operation_gate.py",
+    "repository": "FormatX66/BoxBrain",
+    "commit": "2dda696542864bea159045bb3dfabfb5443cbc94",
+    "path": "Projects/AurumFarmer/aurum_farmer/operation_gate.py",
+    "sha256": "29ed97b8130a87b3b35d14b42d49f7cd44c830f06a6d70100a705d1960aab047"
+  }
+]
