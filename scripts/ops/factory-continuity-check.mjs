@@ -1,0 +1,27 @@
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {fileURLToPath} from 'node:url';
+import {normalizeJob,runAuthorizedBatch} from '../../factory/workflow-controller.mjs';
+import {createValidationExecutor} from '../../factory/validation-executor.mjs';
+import {readSnapshot} from '../../factory/dashboard-feed.mjs';
+if(process.argv[2]!=='--run')throw Error('Explicit --run required; foreground synthetic qualification only');
+const sourceRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
+const evidence=path.join(sourceRoot,'.factory-evidence','continuity');fs.mkdirSync(evidence,{recursive:true});
+const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
+const definitions=[{id:'dashboard-data',revision:'readonly-feed-v1',expectedTests:10,tests:['tests/unit/factory-dashboard-feed.test.mjs'],files:['factory/dashboard-feed.mjs','factory/workflow-controller.mjs','tests/unit/factory-dashboard-feed.test.mjs','web/factory-feed/index.html']},{id:'existing-health',revision:'health-cli-v01',expectedTests:4,tests:['next-build/test/health.test.mjs'],files:['next-build/src/health.mjs','next-build/test/health.test.mjs']}];
+const manifestFile=path.join(evidence,'recipes.json');
+if(!fs.existsSync(manifestFile)){const recipes=definitions.map(({files,...r})=>({...r,manifest:files.map(file=>({file,sha256:hash(fs.readFileSync(path.join(sourceRoot,file)))}))}));fs.writeFileSync(manifestFile,JSON.stringify(recipes,null,2),{flag:'wx'});}
+const recipes=JSON.parse(fs.readFileSync(manifestFile,'utf8'));
+const adapter=createValidationExecutor({sourceRoot,outputRoot:path.join(evidence,'validation'),recipes,timeoutMs:15000});
+const jobs=recipes.map(r=>normalizeJob({id:r.id,goal:'Run the exact reviewed '+r.id+' tests, not a production build',kind:'test',scope:r.id,revision:r.revision,classification:'synthetic',dependencies:[],checkinMinutes:[1,2]}));
+const grants=jobs.map(j=>({source:'operator',jobId:j.id,fingerprint:j.fingerprint,kind:j.kind,scope:j.scope,expiresAt:new Date(Date.now()+600000).toISOString()}));
+const options={root:path.join(evidence,'records'),execute:adapter.execute,verify:adapter.verify,grants,capabilities:['test'],concurrency:2,timeoutMs:20000};
+const records=await runAuthorizedBatch(jobs,options);if(records.some(r=>r.status!=='succeeded'))throw Error('A qualification lane did not pass; inspect preserved records');
+const before=records.map(r=>fs.readFileSync(r.result.receipt,'utf8'));
+const replay=await runAuthorizedBatch(jobs,options);
+if(replay.some((r,i)=>r.attempts!==1||fs.readFileSync(r.result.receipt,'utf8')!==before[i]))throw Error('Completed operation was repeated');
+const executions=records.map(r=>JSON.parse(fs.readFileSync(r.result.receipt,'utf8')));
+const overlapMs=Math.max(0,Math.min(...executions.map(r=>Date.parse(r.completedAt)))-Math.max(...executions.map(r=>Date.parse(r.startedAt))));
+const providerFile=path.resolve(sourceRoot,'../../../../FactoryFreeCapacity/.factory-evidence/free-capacity/latest.json');
+const snapshot=readSnapshot({recordsRoot:options.root,providerFile});
+fs.writeFileSync(path.join(evidence,'dashboard-snapshot.json'),JSON.stringify(snapshot,null,2));
+const summary={schema:'factory.continuity.qualification.v1',at:new Date().toISOString(),runtime:process.version,platform:process.platform,testsPassed:14,parallelOverlapMs:overlapMs,replayDidNotRelaunch:true,jobs:records.map(r=>({id:r.job.id,status:r.status,attempts:r.attempts,pid:r.result&&JSON.parse(fs.readFileSync(r.result.receipt)).pid})),interruptedResumeVerified:false,dashyDeployed:false,browserUiInstalled:false,scope:'Two bounded trusted-source test lanes; not autonomous coding or reboot proof'};
+fs.writeFileSync(path.join(evidence,'qualification.json'),JSON.stringify(summary,null,2));console.log(JSON.stringify(summary));
