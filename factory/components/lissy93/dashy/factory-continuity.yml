@@ -1,0 +1,74 @@
+{
+    "pageInfo":  {
+                     "title":  "Aurum Factory",
+                     "description":  "Staged read-only Factory evidence integration. Dashboard deployment and interrupted-job resume remain held."
+                 },
+    "appConfig":  {
+                      "theme":  "nord",
+                      "layout":  "auto",
+                      "iconSize":  "medium",
+                      "defaultOpeningMethod":  "newtab",
+                      "statusCheck":  false,
+                      "pingCheckEnabled":  false,
+                      "preventWriteToDisk":  true,
+                      "preventLocalSave":  true,
+                      "disableConfiguration":  true,
+                      "allowConfigEdit":  false,
+                      "disableUpdateChecks":  true,
+                      "enableServiceWorker":  false,
+                      "enableErrorReporting":  false,
+                      "enableFontAwesome":  false,
+                      "enableMaterialDesignIcons":  false,
+                      "faviconApi":  "local",
+                      "disableSmartSort":  true,
+                      "webSearch":  {
+                                        "disableWebSearch":  true
+                                    }
+                  },
+    "sections":  [
+                     {
+                         "name":  "Factory evidence - staged",
+                         "widgets":  [
+                                         {
+                                             "type":  "iframe",
+                                             "options":  {
+                                                             "url":  "http://127.0.0.1:19471/",
+                                                             "frameHeight":  1100
+                                                         }
+                                         }
+                                     ],
+                         "items":  [
+                                       {
+                                           "title":  "Factory evidence JSON",
+                                           "description":  "Reserved loopback endpoint; not deployed or a health assertion.",
+                                           "url":  "http://127.0.0.1:19471/v1/snapshot"
+                                       }
+                                   ]
+                     },
+                     {
+                         "name":  "Existing local services",
+                         "items":  [
+                                       {
+                                           "title":  "Aurum monitor",
+                                           "description":  "Existing monitor; authoritative job evidence remains there.",
+                                           "url":  "http://127.0.0.1:19467/"
+                                       },
+                                       {
+                                           "title":  "Factory source gateway",
+                                           "description":  "Service link only; not a health assertion.",
+                                           "url":  "http://127.0.0.1:20130/"
+                                       },
+                                       {
+                                           "title":  "Original OmniRoute gateway",
+                                           "description":  "Existing gateway; left unchanged.",
+                                           "url":  "http://127.0.0.1:20128/"
+                                       },
+                                       {
+                                           "title":  "Medic",
+                                           "description":  "Existing Medic service; no replacement deployed.",
+                                           "url":  "http://127.0.0.1:8090/"
+                                       }
+                                   ]
+                     }
+                 ]
+}
