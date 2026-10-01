@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.secret
+*.dpapi
+*.auth.json
+storage-state*.json
