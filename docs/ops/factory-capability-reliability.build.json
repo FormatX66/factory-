@@ -1,0 +1,123 @@
+{
+  "schema": "factory.capability-reliability.build.v1",
+  "operation_id": "factory-capability-reliability-integration-20261002",
+  "created_at": "2026-10-02",
+  "base_branch": "release/v3.8.51",
+  "branch": "feat/factory-capability-reliability-layer-20261002",
+  "promotion": "manual",
+  "status": "planned",
+  "lkg_policy": "untouched_until_verified_promotion",
+  "existing_reuse": [
+    "promptfoo",
+    "langfuse",
+    "opentelemetry",
+    "shadow-routing",
+    "session-affinity",
+    "quota-scheduler",
+    "github-models",
+    "mcp-tool-registry",
+    "provider-radar",
+    "free-tier-catalog"
+  ],
+  "phases": [
+    {
+      "id": "P0",
+      "name": "contracts-and-baseline",
+      "priority": 1,
+      "selected": "interface-first",
+      "external_dependency": null,
+      "success": "contracts and regression baselines exist with no runtime behavior change",
+      "failure": "hold without enabling integrations",
+      "recovery": "delete candidate branch; LKG unchanged"
+    },
+    {
+      "id": "P1",
+      "name": "durable-run-ledger",
+      "priority": 1,
+      "selected": "existing persistence adapter first; DBOS trial behind interface",
+      "success": "interrupted synthetic multi-step run resumes without replaying completed side effects",
+      "failure": "uncertain side effect becomes HOLD",
+      "recovery": "resume from last verified checkpoint"
+    },
+    {
+      "id": "P2",
+      "name": "execution-shield",
+      "priority": 1,
+      "selected": "OpenShell primary trial; Daytona/E2B optional adapters",
+      "success": "workspace/network/secret boundaries pass negative tests",
+      "failure": "fail closed on policy mismatch",
+      "recovery": "preserve sandbox receipt and LKG"
+    },
+    {
+      "id": "P3",
+      "name": "capability-radar-admission",
+      "priority": 1,
+      "selected": "Official MCP Registry + existing GitHub/Radar + security/admission pipeline",
+      "success": "safe fixture promotes and poisoned fixture quarantines",
+      "failure": "candidate remains quarantined",
+      "recovery": "approved catalog unchanged"
+    },
+    {
+      "id": "P4",
+      "name": "independent-recovery-plane",
+      "priority": 2,
+      "selected": "signed portable manifest; Cloudflare R2 first trial",
+      "success": "clean test instance reconstructs approved/LKG state with primary runtime unavailable",
+      "failure": "no promotion if recovery is not independently readable",
+      "recovery": "local canonical state remains source"
+    },
+    {
+      "id": "P5",
+      "name": "evidence-learning-loop",
+      "priority": 2,
+      "selected": "existing Promptfoo/shadow/Langfuse/OTel + DSPy/GEPA candidate generator",
+      "success": "candidate improvement passes protected evals and rollback test",
+      "failure": "candidate discarded; regression becomes eval case",
+      "recovery": "exact previous prompt/policy artifact restored"
+    },
+    {
+      "id": "P6",
+      "name": "compute-lane-broker",
+      "priority": 3,
+      "selected": "GitHub Actions + Modal; disposable sandbox lanes as available",
+      "success": "reproducible job fails over without canonical-state loss",
+      "failure": "opportunistic lane loss is non-critical",
+      "recovery": "resume from checkpoint on approved alternate lane"
+    }
+  ],
+  "watch_only": [
+    "Arena/LMArena model discovery and human benchmark signals",
+    "Hugging Face ZeroGPU",
+    "Kaggle",
+    "Colab"
+  ],
+  "storage_candidates": [
+    "Cloudflare R2",
+    "Turso",
+    "Supabase",
+    "Backblaze B2"
+  ],
+  "provider_capacity_rules": [
+    "reuse existing provider adapters",
+    "prefer live quota/reset telemetry over static estimates",
+    "signup credits are temporary capacity only",
+    "no consumer-chat UI scraping as production API",
+    "no silent billable spillover"
+  ],
+  "excluded": [
+    "Puter reintegration without a new explicit provider-approved basis",
+    "credential/cookie sharing contrary to terms",
+    "rate-limit or access-control bypasses",
+    "automatic release promotion",
+    "critical dependency on opportunistic notebook/free-tier capacity"
+  ],
+  "verification": [
+    "success failure recovery hold paths",
+    "permission diff",
+    "rollback exercised",
+    "LKG readable",
+    "no secret leakage",
+    "durable receipt",
+    "dated terms/source evidence"
+  ]
+}
