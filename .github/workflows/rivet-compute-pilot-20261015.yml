@@ -42,3 +42,5 @@ jobs:
           set -euo pipefail
           node --version
           node --test "$RUNNER_TEMP/rivet-pilot-test/agent-core.test.mjs"
+
+# Owner-approved single trigger after Actions settings were saved, 2026-10-15T15:19Z.
