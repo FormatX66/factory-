@@ -1,0 +1,44 @@
+name: Rivet one-job compute pilot 20261015
+
+on:
+  push:
+    branches:
+      - rivet/actions-compute-pilot-20261015
+    paths:
+      - .github/workflows/rivet-compute-pilot-20261015.yml
+
+permissions: {}
+
+jobs:
+  agent-core-test:
+    if: ${{ github.run_number == 1 && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch only the inspected public source
+        shell: bash
+        env:
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          set -euo pipefail
+          source_dir="$RUNNER_TEMP/rivet-pilot-source"
+          test_dir="$RUNNER_TEMP/rivet-pilot-test"
+          git init "$source_dir"
+          git -C "$source_dir" config credential.helper ""
+          git -C "$source_dir" config core.hooksPath /dev/null
+          git -C "$source_dir" remote add origin https://github.com/FormatX66/factory-.git
+          git -C "$source_dir" config remote.origin.promisor true
+          git -C "$source_dir" config remote.origin.partialclonefilter blob:none
+          git -C "$source_dir" fetch --no-tags --depth=1 --filter=blob:none origin eb144c7b9145f7b6e883c796ebec9272711461de
+          test "$(git -C "$source_dir" rev-parse FETCH_HEAD)" = eb144c7b9145f7b6e883c796ebec9272711461de
+          mkdir -p "$test_dir"
+          git -C "$source_dir" show eb144c7b9145f7b6e883c796ebec9272711461de:factory/agent-core.mjs > "$test_dir/agent-core.mjs"
+          git -C "$source_dir" show eb144c7b9145f7b6e883c796ebec9272711461de:factory/agent-core.test.mjs > "$test_dir/agent-core.test.mjs"
+          test "$(git hash-object "$test_dir/agent-core.mjs")" = b025d585edf97bb31b9cf5c17e2387cbccb90f80
+          test "$(git hash-object "$test_dir/agent-core.test.mjs")" = 54ff7bd3a8af06e0fa613c05a34795d89d51c2c1
+      - name: Run the four builtin-only unit tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          node --test "$RUNNER_TEMP/rivet-pilot-test/agent-core.test.mjs"
