@@ -215,7 +215,11 @@ scripts/i18n/_pending-keys.json
 # AI agent local settings and configs
 .agents/
 .antigravitycli/
-/.claude/
+/.claude/*
+!/.claude/agents/
+/.claude/agents/*
+!/.claude/agents/factory-pilot-worker.md
+!/.claude/agents/factory-pilot-verifier.md
 
 # PR Reviews and local feedback files
 pr_reviews*.json

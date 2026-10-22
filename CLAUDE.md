@@ -7,6 +7,31 @@ assistant (architecture, conventions, testing, quality gates, git workflow, the 
 PII learnings). Read it in full; do not re-add project rules here. Everything below applies ONLY
 to Claude Code — operational refinements of rules already defined in `AGENTS.md`.
 
+## Factory companion pilot
+
+Use `factory-pilot-worker` for one bounded implementation and `factory-pilot-verifier` for an
+independent review. Give each an approved base commit and owned scope. Native isolated subagents
+can branch from the default branch, so verify the actual base and provision the existing Husky
+hooks and hard-linked dependencies using the worktree protocol before editing or committing.
+
+`node scripts/ops/factory-claude-preflight.mjs` reports local prerequisites and unknowns without
+starting services or changing authentication. `node scripts/check/factory-claude-completion.mjs
+--run` runs only the companion tests and writes a source-bound receipt under the current
+repository's common Git directory, keyed by worktree, so automatic worktree cleanup retains it.
+`--check` validates that receipt without running tests. An existing
+failed or incomplete attempt is retained and is not rerun for unchanged source and runtime.
+
+The worker's scoped Stop hook checks the receipt, asks for one corrective turn when held, and
+then permits an honest hold report. It is not a general completion guarantee. Agent frontmatter
+hooks require trust in the exact project folder and a CLI supporting the declared hook fields;
+verify their registration on the actual host before relying on them. No project-wide hook is added.
+The session checkout and candidate must contain the same completion-check and TAP-parser versions.
+A missing script, missing dependency, or hook timeout can be nonblocking in Claude Code; require
+the explicit `--check` result and independent review before accepting work.
+
+Keep Remote Control and scheduling held until the real host, account eligibility, and route are
+verified. A gateway or API-key route does not establish subscription-only Remote Control access.
+
 ## Worktree isolation — Claude Code specifics
 
 The full mandatory worktree protocol (base-branch confirmation, `.claude/worktrees/` canonical
