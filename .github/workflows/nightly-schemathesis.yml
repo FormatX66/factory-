@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "23 4 * * *"
   workflow_dispatch:
+  # Exercise the changed validation jobs on the review branch before merge.
+  pull_request:
+    branches: ["release/v3.8.51"]
+    paths:
+      - ".github/workflows/nightly-schemathesis.yml"
 
 permissions:
   contents: read
@@ -10,11 +15,14 @@ permissions:
 jobs:
   schemathesis:
     name: Schemathesis — OpenAPI contract fuzz (advisory)
-    # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
-    # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
-    # two listeners, jobs ≤ ~6 GB). Falls back to hosted when USE_VPS_RUNNER is off.
-    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
+    # Keep the operator's VPS selection; hosted fallback uses bounded webpack builds.
+    runs-on: ${{ (github.event_name != 'pull_request' && vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     timeout-minutes: 30
+    # Bounded V8 heap + documented webpack fallback; native Turbopack allocations
+    # are not limited by --max-old-space-size. This is a mitigation, not OOM proof.
+    env:
+      OMNIROUTE_USE_TURBOPACK: "0"
+      OMNIROUTE_BUILD_MEMORY_MB: "8192"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -22,11 +30,36 @@ jobs:
       - uses: actions/setup-node@v7
         with: { node-version: "24", cache: npm }
       - run: npm ci
+      - name: Runner diagnostics
+        shell: bash
+        run: |
+          echo "runner=${{ runner.name }} environment=${{ runner.environment }} os=${{ runner.os }} arch=${{ runner.arch }}"
+          echo "sha=$GITHUB_SHA run=$GITHUB_RUN_ID attempt=$GITHUB_RUN_ATTEMPT"
+          free -m
+          df -h .
+          for f in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.events; do
+            if [ -r "$f" ]; then echo "$f"; cat "$f"; fi
+          done
       - name: Build CLI bundle
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           OMNIROUTE_BUILD_BACKEND_ONLY: "1"
-        run: npm run build:cli
+        shell: bash
+        run: |
+          # Stream resource evidence before a VM shutdown can prevent artifact upload.
+          (
+            while true; do
+              date -u
+              free -m
+              df -h .
+              ps -eo pid,ppid,rss,comm --sort=-rss | head -n 12 || true
+              if [ -r /sys/fs/cgroup/memory.events ]; then cat /sys/fs/cgroup/memory.events; fi
+              sleep 30
+            done
+          ) > >(tee -a runner-resources.log) 2>&1 &
+          monitor_pid=$!
+          trap 'kill "$monitor_pid" 2>/dev/null || true' EXIT
+          npm run build:cli
       - name: Start OmniRoute (background)
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
@@ -35,9 +68,11 @@ jobs:
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:20128/api/monitoring/health >/dev/null; then echo "server up"; break; fi
+            if curl -sf http://localhost:20128/api/monitoring/health >/dev/null; then echo "server up"; exit 0; fi
             sleep 2
           done
+          echo "::error::Server did not become healthy within 60 seconds"
+          exit 1
       - uses: actions/setup-python@v7
         with: { python-version: "3.12" }
       - name: Install schemathesis
@@ -73,5 +108,6 @@ jobs:
           path: |
             schemathesis-report/
             server.log
+            runner-resources.log
           if-no-files-found: warn
           retention-days: 14

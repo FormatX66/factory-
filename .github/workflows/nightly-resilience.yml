@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "41 4 * * *"
   workflow_dispatch:
+  # Exercise the changed validation jobs on the review branch before merge.
+  pull_request:
+    branches: ["release/v3.8.51"]
+    paths:
+      - ".github/workflows/nightly-resilience.yml"
 
 permissions:
   contents: read
@@ -38,6 +43,12 @@ jobs:
 
   k6-soak:
     name: k6 load/soak
+    timeout-minutes: 40
+    # Bounded V8 heap + documented webpack fallback; native Turbopack allocations
+    # are not limited by --max-old-space-size. This is a mitigation, not OOM proof.
+    env:
+      OMNIROUTE_USE_TURBOPACK: "0"
+      OMNIROUTE_BUILD_MEMORY_MB: "8192"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -48,11 +59,36 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
+      - name: Runner diagnostics
+        shell: bash
+        run: |
+          echo "runner=${{ runner.name }} environment=${{ runner.environment }} os=${{ runner.os }} arch=${{ runner.arch }}"
+          echo "sha=$GITHUB_SHA run=$GITHUB_RUN_ID attempt=$GITHUB_RUN_ATTEMPT"
+          free -m
+          df -h .
+          for f in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.events; do
+            if [ -r "$f" ]; then echo "$f"; cat "$f"; fi
+          done
       - name: Build CLI bundle
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           OMNIROUTE_BUILD_BACKEND_ONLY: "1"
-        run: npm run build:cli
+        shell: bash
+        run: |
+          # Stream resource evidence before a VM shutdown can prevent artifact upload.
+          (
+            while true; do
+              date -u
+              free -m
+              df -h .
+              ps -eo pid,ppid,rss,comm --sort=-rss | head -n 12 || true
+              if [ -r /sys/fs/cgroup/memory.events ]; then cat /sys/fs/cgroup/memory.events; fi
+              sleep 30
+            done
+          ) > >(tee -a runner-resources.log) 2>&1 &
+          monitor_pid=$!
+          trap 'kill "$monitor_pid" 2>/dev/null || true' EXIT
+          npm run build:cli
       - name: Start OmniRoute (background)
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
@@ -61,13 +97,15 @@ jobs:
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:20128/api/monitoring/health >/dev/null; then echo "server up"; break; fi
+            if curl -sf http://localhost:20128/api/monitoring/health >/dev/null; then echo "server up"; exit 0; fi
             sleep 2
           done
+          echo "::error::Server did not become healthy within 60 seconds"
+          exit 1
       - name: Install k6
         uses: grafana/setup-k6-action@v1
       - name: Run k6 soak
-        run: k6 run tests/load/k6-soak.js
+        run: k6 run --summary-export=k6-summary.json tests/load/k6-soak.js
         env:
           BASE_URL: http://localhost:20128
           SOAK_DURATION: "3m"
@@ -76,26 +114,34 @@ jobs:
         if: always()
         run: kill "$(cat server.pid)" || true
 
+      - name: Upload k6 evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: k6-evidence
+          path: |
+            k6-summary.json
+            server.log
+            runner-resources.log
+          retention-days: 14
+
   a11y:
     name: A11y axe (nightly, freeze-and-alert)
-    # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
-    # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
-    # two listeners, jobs ≤ ~6 GB). Falls back to hosted when USE_VPS_RUNNER is off.
-    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
-    # The Playwright webServer (`start` mode) builds Next via build-next-isolated.mjs and
-    # boots the standalone server itself (waits on /api/monitoring/health, 15min webServer
-    # timeout). Unlike the per-PR test-e2e job, this nightly job has no pre-built artifact,
-    # so it self-builds — hence the generous job timeout. REQUIRE_AXE=1 makes the suite run
-    # the real axe analysis (the 4 page tests are gated to nightly so per-PR e2e stays fast)
-    # and makes the meta-test fail loudly if @axe-core/playwright ever goes missing.
-    # webServer timeout raised to 30 min (env below) to survive contention on the
-    # shared omni-light listeners; job budget must cover build + 30 min boot + suite.
+    # Keep the operator's VPS selection; hosted fallback uses bounded webpack builds.
+    runs-on: ${{ (github.event_name != 'pull_request' && vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
+    # Build the full dashboard explicitly, then let Playwright boot that exact output.
+    # REQUIRE_AXE keeps real page analysis and the missing-dependency meta-test active.
     timeout-minutes: 50
+    # Bounded V8 heap + documented webpack fallback; native Turbopack allocations
+    # are not limited by --max-old-space-size. This is a mitigation, not OOM proof.
     env:
+      OMNIROUTE_USE_TURBOPACK: "0"
+      OMNIROUTE_BUILD_MEMORY_MB: "8192"
       JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-test-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
       REQUIRE_AXE: "1"
+      PLAYWRIGHT_JUNIT_OUTPUT_FILE: a11y-junit.xml
       # Own a port the rest of the box cannot steal. This job ran on the default
       # 20128 and failed 9 of 10 nights two ways: "http://localhost:20128/
       # api/monitoring/health is already used" when the deployed server (or a
@@ -105,8 +151,7 @@ jobs:
       # PORT drives the server the webServer script boots — both set, same value.
       DASHBOARD_PORT: "21777"
       PORT: "21777"
-      # Boot window: 15 min is not enough when both omni-light listeners are
-      # already building concurrent jobs; 30 min covers the observed worst case.
+      # Server readiness remains bounded independently of the explicit build step.
       OMNIROUTE_PLAYWRIGHT_WEB_SERVER_TIMEOUT: "1800000"
     steps:
       - uses: actions/checkout@v7
@@ -117,6 +162,16 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
+      - name: Runner diagnostics
+        shell: bash
+        run: |
+          echo "runner=${{ runner.name }} environment=${{ runner.environment }} os=${{ runner.os }} arch=${{ runner.arch }}"
+          echo "sha=$GITHUB_SHA run=$GITHUB_RUN_ID attempt=$GITHUB_RUN_ATTEMPT"
+          free -m
+          df -h .
+          for f in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.events; do
+            if [ -r "$f" ]; then echo "$f"; cat "$f"; fi
+          done
       - name: Cache Playwright browsers
         uses: actions/cache@v6.1.0
         with:
@@ -124,5 +179,35 @@ jobs:
           key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: playwright-chromium-${{ runner.os }}-
       - run: npx playwright install --with-deps chromium
-      - name: Run axe a11y suite (self-building webServer)
-        run: npx playwright test tests/e2e/a11y.spec.ts
+      # Full UI build: backend-only stubs would invalidate page accessibility tests.
+      - name: Build dashboard for axe
+        shell: bash
+        run: |
+          # Stream resource evidence before a VM shutdown can prevent artifact upload.
+          (
+            while true; do
+              date -u
+              free -m
+              df -h .
+              ps -eo pid,ppid,rss,comm --sort=-rss | head -n 12 || true
+              if [ -r /sys/fs/cgroup/memory.events ]; then cat /sys/fs/cgroup/memory.events; fi
+              sleep 30
+            done
+          ) > >(tee -a runner-resources.log) 2>&1 &
+          monitor_pid=$!
+          trap 'kill "$monitor_pid" 2>/dev/null || true' EXIT
+          npm run build
+      - name: Run axe a11y suite
+        env:
+          OMNIROUTE_PLAYWRIGHT_SKIP_BUILD: "1"
+        run: npx playwright test tests/e2e/a11y.spec.ts --reporter=line,junit
+      - name: Upload A11y evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: a11y-evidence
+          path: |
+            a11y-junit.xml
+            test-results/
+            runner-resources.log
+          retention-days: 14
