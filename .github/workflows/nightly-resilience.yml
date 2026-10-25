@@ -48,7 +48,7 @@ jobs:
     # are not limited by --max-old-space-size. This is a mitigation, not OOM proof.
     env:
       OMNIROUTE_USE_TURBOPACK: "0"
-      OMNIROUTE_BUILD_MEMORY_MB: "4096"
+      OMNIROUTE_BUILD_MEMORY_MB: "8192"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -81,7 +81,7 @@ jobs:
               date -u
               free -m
               df -h .
-              ps -eo pid,ppid,rss,comm --sort=-rss | head -n 12
+              ps -eo pid,ppid,rss,comm --sort=-rss | head -n 12 || true
               if [ -r /sys/fs/cgroup/memory.events ]; then cat /sys/fs/cgroup/memory.events; fi
               sleep 30
             done
@@ -136,7 +136,7 @@ jobs:
     # are not limited by --max-old-space-size. This is a mitigation, not OOM proof.
     env:
       OMNIROUTE_USE_TURBOPACK: "0"
-      OMNIROUTE_BUILD_MEMORY_MB: "4096"
+      OMNIROUTE_BUILD_MEMORY_MB: "8192"
       JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-test-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
@@ -189,7 +189,7 @@ jobs:
               date -u
               free -m
               df -h .
-              ps -eo pid,ppid,rss,comm --sort=-rss | head -n 12
+              ps -eo pid,ppid,rss,comm --sort=-rss | head -n 12 || true
               if [ -r /sys/fs/cgroup/memory.events ]; then cat /sys/fs/cgroup/memory.events; fi
               sleep 30
             done
