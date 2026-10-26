@@ -1,3 +1,4 @@
+import { __resetProxyRefusalMemoryForTesting } from "../../open-sse/utils/proxyRefusalMemory.ts";
 import { describe, it, beforeEach, afterEach, before, after } from "node:test";
 import assert from "node:assert";
 import net from "node:net";
@@ -108,6 +109,7 @@ describe("opencode rotation with OPENCODE_TRANSIENT_FAILOVER_BACKOFF", () => {
   let events: string[];
 
   beforeEach(() => {
+    __resetProxyRefusalMemoryForTesting();
     originalFetch = globalThis.fetch;
     priorFlag = process.env[FLAG];
     process.env[FLAG] = "true";
@@ -252,6 +254,8 @@ describe("opencode rotation with OPENCODE_TRANSIENT_FAILOVER_BACKOFF", () => {
     await mixedResponse.body?.cancel();
 
     for (const breaker of [{ status: 429 }, { status: 403, body: GEO_BODY }]) {
+      // These are independent scenarios using the same proxy fleet.
+      __resetProxyRefusalMemoryForTesting();
       sleeps = [];
       events = [];
       const exec = newExecutor();

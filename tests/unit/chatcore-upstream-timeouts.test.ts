@@ -122,3 +122,25 @@ test("executeWithUpstreamStartTimeout: a synchronously throwing execute cannot o
     "a late abort must not surface as an unhandledRejection: " + String(unhandled)
   );
 });
+
+test("client cancellation still reaches the upstream signal after headers resolve", async () => {
+  const client = new AbortController();
+  let upstream: AbortSignal | undefined;
+  await executeWithUpstreamStartTimeout({
+    executor: {},
+    provider: "test",
+    model: "test",
+    connectionTimeoutMs: 5000,
+    signal: client.signal,
+    execute: async (signal) => {
+      upstream = signal;
+      return new Response("stream");
+    },
+  });
+  assert.ok(upstream);
+  assert.equal(upstream.aborted, false);
+  const reason = new Error("client disconnected");
+  client.abort(reason);
+  assert.equal(upstream.aborted, true);
+  assert.equal(upstream.reason, reason);
+});

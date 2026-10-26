@@ -242,23 +242,11 @@ export async function executeWithUpstreamStartTimeout<T>({
   if (signal.aborted) throw createAbortError(signal);
 
   const timeoutController = new AbortController();
-  const combinedController = new AbortController();
+  // Native signal composition preserves client cancellation after headers without
+  // retaining a userland listener for every successful executor attempt.
+  const combinedSignal = AbortSignal.any([signal, timeoutController.signal]);
   const timeoutError = createUpstreamStartTimeoutError(timeoutMs, provider, model);
-
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
-  let abortListener: (() => void) | null = null;
-  let timeoutAbortListener: (() => void) | null = null;
-
-  const abortCombined = (source: AbortSignal) => {
-    if (combinedController.signal.aborted) return;
-    const reason = source.reason instanceof Error ? source.reason : createAbortError(source);
-    combinedController.abort(reason);
-  };
-
-  abortListener = () => abortCombined(signal);
-  timeoutAbortListener = () => abortCombined(timeoutController.signal);
-  signal.addEventListener("abort", abortListener, { once: true });
-  timeoutController.signal.addEventListener("abort", timeoutAbortListener, { once: true });
 
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => {
@@ -284,30 +272,13 @@ export async function executeWithUpstreamStartTimeout<T>({
   abortPromise.catch(() => {});
   timeoutPromise.catch(() => {});
 
-  let settled = false;
   try {
-    const result = await Promise.race([
-      execute(combinedController.signal),
-      timeoutPromise,
-      abortPromise,
-    ]);
-    settled = true;
+    const result = await Promise.race([execute(combinedSignal), timeoutPromise, abortPromise]);
     return result;
   } finally {
     if (timeoutId) clearTimeout(timeoutId);
-    // The timeout only bounds time-to-headers, but the client-abort link must
-    // outlive it: once execute() resolves, the response body is still streaming
-    // on combinedController.signal, and a later client disconnect has to reach
-    // the upstream fetch or the provider keeps generating for nobody. Drop the
-    // link only when the attempt failed (the signal is not wired to a live body).
-    // The listener is `once` and the client signal is per-request, so keeping it
-    // is bounded.
-    if (abortListener && !settled) signal.removeEventListener("abort", abortListener);
     // Never removed before this fix: one listener leaked onto the client signal
     // per call (chatCore.ts invokes this once per executor attempt, plus retries).
     if (abortPromiseListener) signal.removeEventListener("abort", abortPromiseListener);
-    if (timeoutAbortListener) {
-      timeoutController.signal.removeEventListener("abort", timeoutAbortListener);
-    }
   }
 }

@@ -89,7 +89,7 @@ export async function getCachedPricing(): Promise<Record<string, unknown>> {
   const cached = pricingCache.get("pricing");
   if (cached) return cached as Record<string, unknown>;
 
-  const { getPricing } = await import("@/lib/db/settings");
+  const { getPricing } = await import("./settings/pricing");
   const value = await getPricing();
   pricingCache.set("pricing", value);
   return value;

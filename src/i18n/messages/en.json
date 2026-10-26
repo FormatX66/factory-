@@ -1001,6 +1001,7 @@
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "Fetch the live xAI model catalog for xai-oauth connections from https://api.x.ai/v1/models using the OAuth bearer token, instead of the frozen static seed. Off by default: xai-oauth keeps serving the static seed unchanged. On any resolution error, discovery falls back to the seed.",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "Run the startup database integrity/health check after the server starts accepting requests instead of blocking startup until it completes. Off by default: startup blocks on the check exactly like before this change, so a corrupt database is still caught before the first request is served.",
   "sidebar": {
+    "modelCatalog": "Model Catalog",
     "home": "Home",
     "dashboard": "Dashboard",
     "providers": "Providers",

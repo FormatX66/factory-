@@ -16,7 +16,6 @@
  * @module domain/quotaCache
  */
 
-import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
@@ -846,6 +845,9 @@ async function refreshEntry(entry: QuotaCacheEntry) {
       return;
     }
 
+    // Loading usage during module initialization closes the
+    // quotaCache → usage → openrouterQuotaFetcher → quotaPreflight cycle.
+    const { getUsageForProvider } = await import("@omniroute/open-sse/services/usage.ts");
     const proxyInfo = await resolveProxyForConnection(entry.connectionId);
     const usage = await runWithProxyContext(proxyInfo?.proxy || null, () =>
       getUsageForProvider(connection)

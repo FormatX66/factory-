@@ -1,4 +1,8 @@
-import { applyStackedCompression } from "../../../open-sse/services/compression/index.ts";
+// Keep the fixture result as a strict stdout protocol despite dependency diagnostics.
+console.log = console.error;
+console.info = console.error;
+console.debug = console.error;
+const { applyStackedCompression } = await import("../../../open-sse/services/compression/index.ts");
 
 const lines = Array.from({ length: 4_000 }, (_, index) => {
   const prefix = `line-${index.toString().padStart(4, "0")}:`;

@@ -1,3 +1,4 @@
+import { __resetProxyRefusalMemoryForTesting } from "../../open-sse/utils/proxyRefusalMemory.ts";
 import { describe, it, beforeEach, afterEach, before, after } from "node:test";
 import assert from "node:assert/strict";
 import net from "node:net";
@@ -97,6 +98,7 @@ describe("OpencodeExecutor Responses first-byte stall", () => {
   let calls: string[];
 
   beforeEach(() => {
+    __resetProxyRefusalMemoryForTesting();
     originalFetch = globalThis.fetch;
     priorTimeout = process.env.RESPONSES_FIRST_BYTE_TIMEOUT_MS;
     priorFlag = process.env[FLAG];

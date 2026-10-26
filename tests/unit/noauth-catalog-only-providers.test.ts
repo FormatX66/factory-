@@ -1,3 +1,4 @@
+import { getRegistryEntry } from "../../open-sse/config/providerRegistry.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -23,6 +24,8 @@ function catalogOnlyNoAuthProviders(): string[] {
   for (const id of Object.keys(NOAUTH_PROVIDERS)) {
     // Only providers that actually ship a catalog can be asserted on.
     if (!(getModelsByProviderId(id) || []).length) continue;
+    // A failed live endpoint is deliberately degraded, never catalog-only.
+    if (getRegistryEntry(id)?.modelsUrl) continue;
     ids.push(id);
   }
   return ids;
@@ -43,7 +46,8 @@ test("catalog-only no-auth providers reach the model-sync import stage", async (
     };
     // Providers with a live remote endpoint report `upstream`; only the
     // catalog-only path is under test here.
-    if (body.source !== "local_catalog") continue;
+    assert.equal(body.source, "local_catalog", `${provider} has no live endpoint`);
+    assert.equal(body.intentional, true);
     if (isDegradedDiscovery(body)) blocked.push(provider);
   }
 
