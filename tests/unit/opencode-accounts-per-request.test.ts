@@ -1,3 +1,4 @@
+import { __resetProxyRefusalMemoryForTesting } from "../../open-sse/utils/proxyRefusalMemory.ts";
 import { describe, it, beforeEach, afterEach, before, after } from "node:test";
 import assert from "node:assert";
 import net from "node:net";
@@ -105,6 +106,7 @@ describe("OpencodeExecutor per-request account lists", () => {
   let observed: ObservedDispatch[];
 
   beforeEach(() => {
+    __resetProxyRefusalMemoryForTesting();
     originalFetch = globalThis.fetch;
     observed = [];
   });

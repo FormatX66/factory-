@@ -66,15 +66,23 @@ test("the last response received during the dispatch wins", async () => {
 test("a fetch still running when the dispatch returns does not change the status", async () => {
   const sink: Sink = { proxy: null };
   let background: Promise<unknown> = Promise.resolve();
+  let releaseFailure!: () => void;
+  const afterDispatch = new Promise<void>((resolve) => {
+    releaseFailure = resolve;
+  });
   await inRequest(sink, async () => {
     await dispatch(async () => {
       const res = await fetch(`${baseUrl}/v1?code=429`);
       background = Promise.all([
         fetch(`${baseUrl}/finish?code=200&delay=50`).then((r) => r.text()),
-        fetch("http://127.0.0.1:1/finish").catch(() => null),
+        // Gate the error until dispatch has ended; a localhost refusal can
+        // otherwise settle while the dispatch is still active.
+        afterDispatch.then(() => fetch("http://127.0.0.1:1/finish")).catch(() => null),
       ]);
       return res;
     });
+    assert.equal(sink.upstreamStatus, 429);
+    releaseFailure();
     await background;
   });
   assert.equal(sink.upstreamStatus, 429);

@@ -10,6 +10,10 @@ name: Nightly Node Compat
 on:
   schedule:
     - cron: "47 6 * * *" # 06:47 UTC diário — slot distinto dos demais nightlies
+  # Exercise this compatibility repair before merge without changing nightly targets.
+  pull_request:
+    branches: ["release/v3.8.51"]
+    paths: [".github/workflows/nightly-compat.yml"]
   workflow_dispatch:
     inputs:
       branch:
@@ -22,7 +26,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: nightly-compat
+  group: nightly-compat-${{ github.event.pull_request.number || 'scheduled' }}
   cancel-in-progress: true
 
 jobs:
@@ -40,8 +44,14 @@ jobs:
         id: branch
         env:
           INPUT_BRANCH: ${{ github.event.inputs.branch }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
+          if [ -n "${PR_SHA:-}" ]; then
+            [[ "$PR_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+            echo "target=$PR_SHA" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [ -n "${INPUT_BRANCH:-}" ]; then
             TARGET="$INPUT_BRANCH"
           else
@@ -112,12 +122,23 @@ jobs:
           cache: npm
       - uses: ./.github/actions/npm-ci-retry
       - run: npm run check:node-runtime
-      - run: npm run test:unit:ci:shard
+      - name: Run compatibility shard
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:unit:ci:shard 2>&1 | tee compat-tests.log
+      - name: Preserve complete shard output
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: node-${{ matrix.node }}-shard-${{ matrix.shard }}
+          path: compat-tests.log
+          retention-days: 14
 
   report:
     name: Open / update tracking issue on failure
     runs-on: ubuntu-latest
-    if: ${{ !cancelled() && (needs.compat-tests.result == 'failure' || needs.compat-build-26.result == 'failure') }}
+    if: ${{ github.event_name != 'pull_request' && !cancelled() && (needs.compat-tests.result == 'failure' || needs.compat-build-26.result == 'failure') }}
     needs: [resolve-branch, compat-build-26, compat-tests]
     permissions:
       issues: write
