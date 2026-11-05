@@ -1028,8 +1028,9 @@ jobs:
 
   # Node 24/26 compatibility matrices moved to .github/workflows/nightly-compat.yml
   # (plano mestre testes+CI, Eixo D2 — they cost ~28% of every heavy run to catch a
-  # failure class that rarely originates in a PR; nightly catches it within 24h and
-  # the release gate can still exercise them via workflow_dispatch when needed).
+  # failure class that rarely originates in a PR; weekly sweeps complement the
+  # Node 24 code-change checks. For on-demand Node 24/26 validation, use that
+  # workflow's workflow_dispatch with an optional branch override).
   test-coverage:
     name: Coverage
     runs-on: ubuntu-latest

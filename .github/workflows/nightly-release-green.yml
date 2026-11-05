@@ -12,7 +12,7 @@ name: Release-Green (continuous)
 #     captain's direct pushes (sync-back — the one ungated write path) AND the merged
 #     COMBINATION right after every PR merge, attributing the offending push range in
 #     the issue. Base-red MTTD drops from ≤24h to ≤~15min after the offending push.
-#   schedule (3×/day) → full --with-build --full-ci (the deep sweep incl. build+suites).
+#   schedule (1×/day) → full --with-build --full-ci (the deep sweep incl. build+suites).
 #
 # It is NOT a required status check and never touches a contributor PR — it only
 # reports. Ratchet drift (eslint warnings / cognitive-complexity / file-size) is
@@ -35,9 +35,7 @@ on:
       - "package-lock.json"
       - "tsconfig*.json"
   schedule:
-    - cron: "23 5 * * *" # full sweep — off-peak, distinct from other nightlies
-    - cron: "23 12 * * *" # full sweep — midday (WS5.1: 3×/day instead of 1×)
-    - cron: "23 18 * * *" # full sweep — evening
+    - cron: "23 5 * * *" # daily full sweep — 05:23 UTC, distinct from other nightlies
   workflow_dispatch:
     inputs:
       branch:
